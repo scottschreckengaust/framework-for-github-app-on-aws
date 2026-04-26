@@ -1,0 +1,5 @@
+export const WebhookEnvironmentVariables = {
+  WEBHOOK_SECRET_ARN: 'WEBHOOK_SECRET_ARN',
+  EVENT_BUS_NAME: 'EVENT_BUS_NAME',
+  IDEMPOTENCY_TABLE_NAME: 'IDEMPOTENCY_TABLE_NAME',
+} as const;
