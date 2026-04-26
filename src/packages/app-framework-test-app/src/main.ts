@@ -23,6 +23,18 @@ export class TheAppFrameworkTestStack extends Stack {
       value: installationAccessTokenUrl,
       exportName: 'InstallationAccessTokenEndpoint',
     });
+    new CfnOutput(this, 'RefreshCachedDataEndpoint', {
+      value: credentialManager.refreshCachedDataEndpoint,
+      exportName: 'RefreshCachedDataEndpoint',
+    });
+    new CfnOutput(this, 'InstallationRecordEndpoint', {
+      value: credentialManager.installationRecordEndpoint,
+      exportName: 'InstallationRecordEndpoint',
+    });
+    new CfnOutput(this, 'InstallationsEndpoint', {
+      value: credentialManager.installationsEndpoint,
+      exportName: 'InstallationsEndpoint',
+    });
     new CfnOutput(this, 'Region', {
       value: Aws.REGION,
       exportName: 'Region',
