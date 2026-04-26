@@ -1,4 +1,4 @@
-import { CredentialManager } from '@aws/app-framework-for-github-apps-on-aws';
+import { CredentialManager, WebhookIngestion } from '@aws/app-framework-for-github-apps-on-aws';
 import { App, Stack, StackProps, CfnOutput, Aws } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 // CDK App entry for @aws/app-framework-for-github-apps-on-aws acceptance test.
@@ -39,6 +39,17 @@ export class TheAppFrameworkTestStack extends Stack {
       value: Aws.REGION,
       exportName: 'Region',
     });
+
+    const webhookSecretArn = this.node.tryGetContext('webhookSecretArn') as string;
+    if (webhookSecretArn) {
+      const webhook = new WebhookIngestion(this, 'WebhookIngestion', {
+        webhookSecretArn,
+      });
+      new CfnOutput(this, 'WebhookEndpoint', {
+        value: webhook.apiEndpoint,
+        exportName: 'WebhookEndpoint',
+      });
+    }
   }
 }
 
