@@ -53,18 +53,21 @@ Failed steps trigger a DLQ. An alert Lambda processes DLQ messages and posts fai
 Three new DynamoDB tables alongside the existing App and Installation tables:
 
 ### UserTokens Table
+
 - **PK**: `GitHubUserId` (number)
 - **Fields**: login, encrypted access token, encrypted refresh token, token expiry, scopes granted, last used timestamp
 - **Encryption**: Customer-managed KMS key on the table
 - **TTL**: On rows where user revokes access
 
 ### AuthState Table
+
 - **PK**: `StateNonce` (string)
 - **Fields**: GitHub login (from the triggering comment), redirect context (repo/issue to return to)
 - **TTL**: 10 minutes
 - **Purpose**: CSRF prevention on OAuth callback
 
 ### Jobs Table
+
 - **PK**: `JobId` (ULID)
 - **GSI 1**: `RepoFullName + Status` — for "what's running in this repo?" queries
 - **GSI 2**: `UserId + CreatedAt` — for "my jobs" queries
@@ -73,14 +76,17 @@ Three new DynamoDB tables alongside the existing App and Installation tables:
 ## 6. Error Handling and Observability
 
 ### Idempotency
+
 Each handler uses the webhook `delivery` GUID as a deduplication key via a DynamoDB condition expression. Duplicate deliveries are silently dropped.
 
 ### Failure Handling
+
 - Failed EventBridge deliveries go to a DLQ (SQS).
 - Failed Step Functions steps retry 2x with exponential backoff, then transition to a failure state that posts a Check Run failure or error comment.
 - OAuth token refresh failures trigger a re-auth prompt to the user.
 
 ### Observability
+
 - All Lambdas use X-Ray tracing (matching the existing framework pattern).
 - Structured JSON logging from all Lambdas.
 - CloudWatch alarms on: DLQ depth > 0, OAuth token refresh failures, webhook signature validation failures.
@@ -88,20 +94,20 @@ Each handler uses the webhook `delivery` GUID as a deduplication key via a Dynam
 
 ## 7. Infrastructure Summary
 
-| Component | AWS Service |
-|-----------|-------------|
-| Webhook endpoint | API Gateway + WAF |
-| Webhook validation | Lambda |
-| Event routing | EventBridge custom bus |
-| Event handlers | Lambda (one per event category) |
-| User auth (OAuth) | API Gateway + Lambda (login + callback) |
-| Token storage | DynamoDB + customer-managed KMS |
-| Auth state (CSRF) | DynamoDB with TTL |
-| Orchestration | Step Functions (Express + Standard) |
-| Job tracking | DynamoDB |
-| Failure handling | SQS DLQ + alert Lambda |
-| Monitoring | CloudWatch dashboard + alarms + X-Ray |
-| GitHub App auth | Existing Credential Manager (unchanged) |
+| Component          | AWS Service                             |
+| ------------------ | --------------------------------------- |
+| Webhook endpoint   | API Gateway + WAF                       |
+| Webhook validation | Lambda                                  |
+| Event routing      | EventBridge custom bus                  |
+| Event handlers     | Lambda (one per event category)         |
+| User auth (OAuth)  | API Gateway + Lambda (login + callback) |
+| Token storage      | DynamoDB + customer-managed KMS         |
+| Auth state (CSRF)  | DynamoDB with TTL                       |
+| Orchestration      | Step Functions (Express + Standard)     |
+| Job tracking       | DynamoDB                                |
+| Failure handling   | SQS DLQ + alert Lambda                  |
+| Monitoring         | CloudWatch dashboard + alarms + X-Ray   |
+| GitHub App auth    | Existing Credential Manager (unchanged) |
 
 ## 8. Security Properties
 
@@ -117,6 +123,7 @@ Each handler uses the webhook `delivery` GUID as a deduplication key via a Dynam
 ## 9. GitHub App Configuration Changes
 
 The existing `ai3-mvp` app registration needs:
+
 - **Webhook URL**: Set to the API Gateway webhook endpoint
 - **Webhook secret**: Generate a strong secret, store in AWS Secrets Manager
 - **Callback URL**: Set to the API Gateway `/auth/callback` endpoint

@@ -43,6 +43,7 @@ src/packages/app-framework/src/
 Go to: `github.com/organizations/sbalswa/settings/apps/ai3-mvp`
 
 Set:
+
 - **Callback URL**: `https://<your-api-gateway-url>/auth/callback` (use the API Gateway URL from Plan A deploy — you will update this after Task 6 deploy)
 - **Request user authorization (OAuth) during installation**: Leave unchecked
 - **Enable Device Flow**: Leave unchecked
@@ -50,12 +51,14 @@ Set:
 - [ ] **Step 2: Note the Client ID and generate a Client Secret**
 
 On the same page:
+
 - **Client ID**: Already shown (e.g., `Iv23li6ndiRoICMS3xab`)
 - Click **"Generate a new client secret"** — copy and save the secret value
 
 - [ ] **Step 3: Store the Client Secret in AWS Secrets Manager**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws secretsmanager create-secret \
   --name ai3-mvp/oauth-client-secret \
@@ -70,6 +73,7 @@ Note the ARN from the output.
 ### Task 2: Token Store Module
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/auth/tokenStore.ts`
 - Test: `src/packages/app-framework/src/webhook/auth/tokenStore.test.ts`
 
@@ -247,6 +251,7 @@ git commit -m "feat(oauth): add DynamoDB token store module"
 ### Task 3: Authorization Module
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/auth/authorizeUser.ts`
 - Test: `src/packages/app-framework/src/webhook/auth/authorizeUser.test.ts`
 
@@ -456,6 +461,7 @@ git commit -m "feat(oauth): add shared user authorization module"
 ### Task 4: OAuth Login Lambda Handler
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/auth/oauthLogin.handler.ts`
 - Test: `src/packages/app-framework/src/webhook/auth/oauthLogin.handler.test.ts`
 - Create: `src/packages/app-framework/src/webhook/auth/oauthLogin.ts`
@@ -623,6 +629,7 @@ git commit -m "feat(oauth): add OAuth login Lambda with state nonce"
 ### Task 5: OAuth Callback Lambda Handler
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/auth/oauthCallback.handler.ts`
 - Test: `src/packages/app-framework/src/webhook/auth/oauthCallback.handler.test.ts`
 - Create: `src/packages/app-framework/src/webhook/auth/oauthCallback.ts`
@@ -912,6 +919,7 @@ git commit -m "feat(oauth): add OAuth callback Lambda with token exchange"
 ### Task 6: Update WebhookIngestion Construct with OAuth
 
 **Files:**
+
 - Modify: `src/packages/app-framework/src/webhook/index.ts`
 - Modify: `src/packages/app-framework/src/webhook/constants.ts`
 
@@ -934,6 +942,7 @@ export const OAuthEnvironmentVariables = {
 Modify `src/packages/app-framework/src/webhook/index.ts`:
 
 Add to `WebhookIngestionProps`:
+
 ```typescript
 export interface WebhookIngestionProps {
   readonly webhookSecretArn: string;
@@ -943,6 +952,7 @@ export interface WebhookIngestionProps {
 ```
 
 Add new imports at the top:
+
 ```typescript
 import { OAuthLogin } from './auth/oauthLogin';
 import { OAuthCallback } from './auth/oauthCallback';
@@ -1000,6 +1010,7 @@ Inside the constructor, after the WAF association and before the stub handler, a
 ```
 
 Add `userTokensTable` as a class property:
+
 ```typescript
   readonly userTokensTable?: Table;
 ```
@@ -1016,6 +1027,7 @@ git commit -m "feat(oauth): add OAuth routes and tables to WebhookIngestion cons
 ### Task 7: Update Test App and Deploy
 
 **Files:**
+
 - Modify: `src/packages/app-framework-test-app/src/main.ts`
 
 - [ ] **Step 1: Update test app to pass OAuth config**
@@ -1047,6 +1059,7 @@ Expected: All tests pass, compilation succeeds.
 - [ ] **Step 3: Deploy**
 
 Run (replace ARNs with actual values):
+
 ```bash
 cd src/packages/app-framework-test-app && \
 AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
@@ -1060,6 +1073,7 @@ AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
 - [ ] **Step 4: Update GitHub App callback URL (MANUAL)**
 
 Go to `github.com/organizations/sbalswa/settings/apps/ai3-mvp` and set:
+
 - **Callback URL**: `https://<api-gateway-url>/auth/callback`
 
 - [ ] **Step 5: Commit**
@@ -1078,6 +1092,7 @@ git commit -m "feat(test-app): add OAuth config to WebhookIngestion"
 - [ ] **Step 1: Test the login flow**
 
 Open in a browser:
+
 ```
 https://<api-gateway-url>/auth/login?repo=sbalswa/test-repo&issue=1
 ```
@@ -1087,6 +1102,7 @@ Expected: Redirects to GitHub's OAuth authorization page. After authorizing, red
 - [ ] **Step 2: Verify token was stored**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws dynamodb scan \
   --table-name <UserTokensTable-name> \
@@ -1101,6 +1117,7 @@ Expected: Shows your GitHub user ID, login, and a token expiry ~8 hours in the f
 ## Summary
 
 After completing this plan you will have:
+
 - GitHub OAuth login/callback flow via API Gateway
 - UserTokens DynamoDB table with token storage
 - AuthState DynamoDB table with CSRF-preventing nonces

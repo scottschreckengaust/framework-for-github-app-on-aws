@@ -1,7 +1,8 @@
+// prettier-ignore
 interface GitHubEventBridgeEvent {
-  source: string;
+  'source': string;
   'detail-type': string;
-  detail: {
+  'detail': {
     delivery_id: string;
     action?: string;
     sender?: { login: string };

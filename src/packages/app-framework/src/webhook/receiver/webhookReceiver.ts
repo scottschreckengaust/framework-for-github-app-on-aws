@@ -22,13 +22,17 @@ export class WebhookReceiver extends Construct {
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
-      description: 'Receives GitHub webhooks, verifies signatures, dispatches to EventBridge',
+      description:
+        'Receives GitHub webhooks, verifies signatures, dispatches to EventBridge',
       memorySize: 256,
       timeout: Duration.seconds(30),
       environment: {
-        [WebhookEnvironmentVariables.WEBHOOK_SECRET_ARN]: props.webhookSecretArn,
-        [WebhookEnvironmentVariables.EVENT_BUS_NAME]: props.eventBus.eventBusName,
-        [WebhookEnvironmentVariables.IDEMPOTENCY_TABLE_NAME]: props.idempotencyTable.tableName,
+        [WebhookEnvironmentVariables.WEBHOOK_SECRET_ARN]:
+          props.webhookSecretArn,
+        [WebhookEnvironmentVariables.EVENT_BUS_NAME]:
+          props.eventBus.eventBusName,
+        [WebhookEnvironmentVariables.IDEMPOTENCY_TABLE_NAME]:
+          props.idempotencyTable.tableName,
       },
     });
 

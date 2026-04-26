@@ -43,6 +43,7 @@ src/packages/app-framework/src/
 ### Task 1: Jobs Table CDK Construct
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/orchestration/jobsTable.ts`
 
 - [ ] **Step 1: Write the Jobs table construct**
@@ -101,6 +102,7 @@ git commit -m "feat(orchestration): add Jobs DynamoDB table construct"
 ### Task 2: Reporting Helpers
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/orchestration/reportCheckRun.ts`
 - Test: `src/packages/app-framework/src/webhook/orchestration/reportCheckRun.test.ts`
 - Create: `src/packages/app-framework/src/webhook/orchestration/reportComment.ts`
@@ -360,6 +362,7 @@ git commit -m "feat(orchestration): add Check Run and comment reporting helpers"
 ### Task 3: Start Execution Helper
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/orchestration/startExecution.ts`
 - Test: `src/packages/app-framework/src/webhook/orchestration/startExecution.test.ts`
 
@@ -503,6 +506,7 @@ git commit -m "feat(orchestration): add Step Functions execution starter with jo
 ### Task 4: Comment Handler (Replaces Stub)
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/handlers/commentHandler.handler.ts`
 - Test: `src/packages/app-framework/src/webhook/handlers/commentHandler.handler.test.ts`
 - Create: `src/packages/app-framework/src/webhook/handlers/commentHandler.ts`
@@ -731,6 +735,7 @@ git commit -m "feat(orchestration): add comment handler with auth integration"
 ### Task 5: DLQ Alert Handler
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/alertHandler.handler.ts`
 - Test: `src/packages/app-framework/src/webhook/alertHandler.handler.test.ts`
 - Create: `src/packages/app-framework/src/webhook/alertHandler.ts`
@@ -847,6 +852,7 @@ git commit -m "feat(orchestration): add DLQ alert handler"
 ### Task 6: Update WebhookIngestion with Orchestration
 
 **Files:**
+
 - Modify: `src/packages/app-framework/src/webhook/index.ts`
 - Modify: `src/packages/app-framework/src/webhook/constants.ts`
 
@@ -867,6 +873,7 @@ export const OrchestrationEnvironmentVariables = {
 Modify `src/packages/app-framework/src/webhook/index.ts`:
 
 Add imports:
+
 ```typescript
 import { JobsTable } from './orchestration/jobsTable';
 import { CommentHandler } from './handlers/commentHandler';
@@ -874,6 +881,7 @@ import { AlertHandler } from './alertHandler';
 ```
 
 Add class properties:
+
 ```typescript
   readonly jobsTable?: Table;
 ```
@@ -949,6 +957,7 @@ Expected: All tests pass.
 - [ ] **Step 2: Deploy**
 
 Run (replace ARNs):
+
 ```bash
 cd src/packages/app-framework-test-app && \
 AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
@@ -962,17 +971,20 @@ AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
 - [ ] **Step 3: Test comment handler (MANUAL)**
 
 Go to any issue in a `sbalswa` repo and comment:
+
 ```
 @ai3-mvp hello
 ```
 
 Expected: The bot replies with either:
+
 - An "authorize" link (if you haven't OAuth'd yet)
 - "Received your command. Processing..." (if you have)
 
 - [ ] **Step 4: Verify Jobs table exists**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws dynamodb list-tables --region us-east-1 \
   --query 'TableNames[?contains(@, `Jobs`)]'
@@ -983,6 +995,7 @@ Expected: Shows the Jobs table name.
 - [ ] **Step 5: Verify DLQ is empty (no failures)**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws sqs get-queue-attributes \
   --queue-url <dlq-url> \
@@ -997,6 +1010,7 @@ Expected: `ApproximateNumberOfMessages: 0`
 ## Summary
 
 After completing this plan you will have:
+
 - Jobs DynamoDB table with GSIs for repo and user queries
 - GitHub Check Run create/update helpers
 - GitHub comment post/edit helpers

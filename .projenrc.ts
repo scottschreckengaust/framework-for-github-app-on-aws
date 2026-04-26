@@ -102,7 +102,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
     prettier: true,
     fileExtensions: [".ts", ".md"],
     dirs: ["src", "test", "docs"],
-    ignorePatterns: ["src/packages/smithy/build/**/*"],
+    ignorePatterns: ["src/packages/smithy/build/**/*", "docs/superpowers/**/*"],
   },
   jestOptions: {
     jestConfig: {
@@ -212,7 +212,9 @@ createPackage({
   deps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-eventbridge",
     "@aws-sdk/client-kms",
+    "@aws-sdk/client-secrets-manager",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-common",
@@ -227,8 +229,10 @@ createPackage({
   bundledDeps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
+    "@aws-sdk/client-eventbridge",
     "@aws-smithy/server-common",
     "@aws-sdk/client-kms",
+    "@aws-sdk/client-secrets-manager",
     "@aws-sdk/util-dynamodb",
     "aws-xray-sdk",
     "aws-lambda",

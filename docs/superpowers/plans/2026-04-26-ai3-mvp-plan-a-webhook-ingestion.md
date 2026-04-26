@@ -48,20 +48,24 @@ This task must be done by the operator before the webhook pipeline can receive e
 - [ ] **Step 1: Generate a webhook secret**
 
 Run:
+
 ```bash
 openssl rand -hex 32
 ```
+
 Save the output — this is your webhook secret.
 
 - [ ] **Step 2: Store the webhook secret in AWS Secrets Manager**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws secretsmanager create-secret \
   --name ai3-mvp/webhook-secret \
   --secret-string "<output-from-step-1>" \
   --region us-east-1
 ```
+
 Expected: JSON response with `ARN` and `Name`.
 
 - [ ] **Step 3: Note the secret ARN**
@@ -75,6 +79,7 @@ This step happens AFTER the stack is deployed in Task 7. Go to:
 `github.com/organizations/sbalswa/settings/apps/ai3-mvp`
 
 Set:
+
 - **Webhook URL**: The API Gateway endpoint URL from the CDK deploy output
 - **Webhook secret**: The secret value from Step 1
 - **Active**: Check the box
@@ -85,6 +90,7 @@ Set:
 ### Task 2: Webhook Signature Verification Module
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/receiver/verifySignature.ts`
 - Test: `src/packages/app-framework/src/webhook/receiver/verifySignature.test.ts`
 
@@ -184,6 +190,7 @@ git commit -m "feat(webhook): add HMAC-SHA256 signature verification module"
 ### Task 3: Webhook Receiver Lambda Handler
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/receiver/webhookReceiver.handler.ts`
 - Create: `src/packages/app-framework/src/webhook/constants.ts`
 
@@ -329,6 +336,7 @@ git commit -m "feat(webhook): add receiver Lambda handler with idempotency"
 ### Task 4: Stub Event Handler Lambda
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/handlers/stubHandler.handler.ts`
 - Test: `src/packages/app-framework/src/webhook/handlers/stubHandler.handler.test.ts`
 
@@ -423,6 +431,7 @@ git commit -m "feat(webhook): add stub event handler for pipeline testing"
 ### Task 5: WebhookIngestion CDK Construct
 
 **Files:**
+
 - Create: `src/packages/app-framework/src/webhook/receiver/webhookReceiver.ts`
 - Create: `src/packages/app-framework/src/webhook/handlers/stubHandler.ts`
 - Create: `src/packages/app-framework/src/webhook/index.ts`
@@ -647,6 +656,7 @@ export class WebhookIngestion extends Construct {
 Add to `src/packages/app-framework/src/index.ts` (which currently only exports CredentialManager):
 
 Append this line:
+
 ```typescript
 export { WebhookIngestion, WebhookIngestionProps } from './webhook';
 ```
@@ -663,6 +673,7 @@ git commit -m "feat(webhook): add WebhookIngestion CDK construct with API GW + W
 ### Task 6: Wire into Test App Stack
 
 **Files:**
+
 - Modify: `src/packages/app-framework-test-app/src/main.ts`
 
 - [ ] **Step 1: Update the test app to include WebhookIngestion**
@@ -670,6 +681,7 @@ git commit -m "feat(webhook): add WebhookIngestion CDK construct with API GW + W
 Modify `src/packages/app-framework-test-app/src/main.ts`. Add these imports and construct usage:
 
 At the top, change the import to include `WebhookIngestion`:
+
 ```typescript
 import { CredentialManager, WebhookIngestion } from '@aws/app-framework-for-github-apps-on-aws';
 ```
@@ -705,14 +717,17 @@ git commit -m "feat(test-app): wire WebhookIngestion into test app stack"
 - [ ] **Step 1: Build the framework**
 
 Run:
+
 ```bash
 npx projen build
 ```
+
 Expected: All packages compile, tests pass. If there are import errors, check that the `webhook/` directory files are included in the TypeScript compilation.
 
 - [ ] **Step 2: Deploy with the webhook secret ARN**
 
 Run (replace the secret ARN with the one from Task 1 Step 3):
+
 ```bash
 cd src/packages/app-framework-test-app && \
 AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
@@ -720,14 +735,17 @@ AWS_PROFILE=burner2 npx cdk deploy the-app-framework-test-stack \
   --outputs-file /tmp/cdk-output.json \
   --require-approval never
 ```
+
 Expected: Stack deploys successfully. Output includes `WebhookEndpoint`.
 
 - [ ] **Step 3: Note the webhook endpoint URL**
 
 Run:
+
 ```bash
 cat /tmp/cdk-output.json | grep WebhookEndpoint
 ```
+
 Copy this URL — you need it for Task 1 Step 4 (configuring the GitHub App).
 
 - [ ] **Step 4: Commit (no code changes, just checkpoint)**
@@ -751,6 +769,7 @@ Go to any repo in the `sbalswa` org and star/unstar it. This sends a `star` webh
 - [ ] **Step 3: Check the stub handler CloudWatch logs**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws logs describe-log-groups \
   --log-group-name-prefix /aws/lambda/the-app-framework-test-stack \
@@ -759,6 +778,7 @@ AWS_PROFILE=burner2 aws logs describe-log-groups \
 ```
 
 Find the StubHandler log group, then:
+
 ```bash
 AWS_PROFILE=burner2 aws logs tail \
   /aws/lambda/the-app-framework-test-stack-WebhookIngestionStubHandler... \
@@ -774,11 +794,13 @@ Redeliver the same event from GitHub App settings → Advanced → Recent Delive
 - [ ] **Step 5: Verify WAF is active**
 
 Run:
+
 ```bash
 AWS_PROFILE=burner2 aws wafv2 get-web-acl-for-resource \
   --resource-arn <api-gateway-stage-arn> \
   --region us-east-1
 ```
+
 Expected: Returns the WAF Web ACL details.
 
 ---
@@ -786,6 +808,7 @@ Expected: Returns the WAF Web ACL details.
 ## Summary
 
 After completing this plan you will have:
+
 - API Gateway endpoint receiving GitHub webhooks with WAF protection
 - HMAC-SHA256 signature verification
 - Idempotent event processing (DynamoDB dedup on delivery GUID)

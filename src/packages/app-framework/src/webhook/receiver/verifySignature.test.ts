@@ -1,5 +1,5 @@
-import { verifySignature } from './verifySignature';
 import { createHmac } from 'crypto';
+import { verifySignature } from './verifySignature';
 
 const SECRET = 'test-webhook-secret-value';
 
@@ -30,7 +30,9 @@ describe('verifySignature', () => {
   it('returns false for a tampered body', () => {
     const body = '{"action":"opened"}';
     const signature = sign(body, SECRET);
-    expect(verifySignature('{"action":"closed"}', signature, SECRET)).toBe(false);
+    expect(verifySignature('{"action":"closed"}', signature, SECRET)).toBe(
+      false,
+    );
   });
 
   it('returns false for wrong secret', () => {

@@ -8,13 +8,10 @@ import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
-import {
-  CfnWebACL,
-  CfnWebACLAssociation,
-} from 'aws-cdk-lib/aws-wafv2';
+import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import { Construct } from 'constructs';
-import { WebhookReceiver } from './receiver/webhookReceiver';
 import { StubHandler } from './handlers/stubHandler';
+import { WebhookReceiver } from './receiver/webhookReceiver';
 
 export interface WebhookIngestionProps {
   readonly webhookSecretArn: string;

@@ -7,10 +7,11 @@ describe('stub event handler', () => {
   afterAll(() => consoleSpy.mockRestore());
 
   it('logs the event type and delivery id', async () => {
+    // prettier-ignore
     const event = {
-      source: 'github',
+      'source': 'github',
       'detail-type': 'issue_comment',
-      detail: {
+      'detail': {
         delivery_id: 'abc-123',
         action: 'created',
         sender: { login: 'testuser' },
@@ -22,8 +23,6 @@ describe('stub event handler', () => {
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringContaining('issue_comment'),
     );
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('abc-123'),
-    );
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('abc-123'));
   });
 });

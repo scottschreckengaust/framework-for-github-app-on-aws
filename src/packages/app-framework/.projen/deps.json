@@ -96,7 +96,15 @@
       "type": "bundled"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "type": "bundled"
+    },
+    {
       "name": "@aws-sdk/client-kms",
+      "type": "bundled"
+    },
+    {
+      "name": "@aws-sdk/client-secrets-manager",
       "type": "bundled"
     },
     {
@@ -154,7 +162,15 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-kms",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-secrets-manager",
       "type": "runtime"
     },
     {

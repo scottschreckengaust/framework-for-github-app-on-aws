@@ -1,16 +1,16 @@
 import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from '@aws-sdk/client-secrets-manager';
+  DynamoDBClient,
+  PutItemCommand,
+  ConditionalCheckFailedException,
+} from '@aws-sdk/client-dynamodb';
 import {
   EventBridgeClient,
   PutEventsCommand,
 } from '@aws-sdk/client-eventbridge';
 import {
-  DynamoDBClient,
-  PutItemCommand,
-  ConditionalCheckFailedException,
-} from '@aws-sdk/client-dynamodb';
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 import { verifySignature } from './verifySignature';
 import { WebhookEnvironmentVariables } from '../constants';
