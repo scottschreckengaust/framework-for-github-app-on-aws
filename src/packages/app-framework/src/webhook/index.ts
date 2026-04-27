@@ -103,6 +103,11 @@ export class WebhookIngestion extends Construct {
             managedRuleGroupStatement: {
               vendorName: 'AWS',
               name: 'AWSManagedRulesCommonRuleSet',
+              excludedRules: [
+                { name: 'GenericLFI_BODY' },
+                { name: 'SizeRestrictions_BODY' },
+                { name: 'GenericRFI_BODY' },
+              ],
             },
           },
         },

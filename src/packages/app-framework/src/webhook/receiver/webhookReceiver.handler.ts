@@ -59,9 +59,16 @@ async function checkIdempotency(deliveryId: string): Promise<boolean> {
 export const handler = async (
   event: APIGatewayProxyEvent,
 ): Promise<APIGatewayProxyResult> => {
-  const signature = event.headers['x-hub-signature-256'] || '';
-  const deliveryId = event.headers['x-github-delivery'] || '';
-  const eventType = event.headers['x-github-event'] || '';
+  console.log('Headers:', JSON.stringify(event.headers));
+
+  const headers: Record<string, string | undefined> = {};
+  for (const [key, value] of Object.entries(event.headers)) {
+    headers[key.toLowerCase()] = value;
+  }
+
+  const signature = headers['x-hub-signature-256'] || '';
+  const deliveryId = headers['x-github-delivery'] || '';
+  const eventType = headers['x-github-event'] || '';
   const body = event.body || '';
 
   if (!deliveryId || !eventType) {
