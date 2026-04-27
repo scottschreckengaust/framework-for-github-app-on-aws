@@ -129,3 +129,33 @@ The existing `ai3-mvp` app registration needs:
 - **Callback URL**: Set to the API Gateway `/auth/callback` endpoint
 - **Permissions**: Add `checks: write`, `pull_requests: write`, `issues: write`, `members: read`, `statuses: write` (in addition to existing `contents: read`)
 - **Events**: Subscribe to all needed event types (issue_comment, pull_request, push, repository, star, check_run, deployment, etc.)
+
+## 10. Lessons Learned (Plan A Execution)
+
+### WAF False Positives on Webhook Payloads
+
+The AWS Managed Rules Common Rule Set (`AWSManagedRulesCommonRuleSet`) blocks GitHub webhook POST requests.
+Rules `GenericLFI_BODY`, `SizeRestrictions_BODY`, and `GenericRFI_BODY` trigger on URLs and large JSON in webhook payloads.
+These must be excluded from the rule group when protecting a webhook endpoint.
+
+### API Gateway Header Casing
+
+REST API Gateway preserves the original mixed-case headers from the sender (e.g., `X-GitHub-Event`), contrary to common assumptions that it lowercases them.
+Webhook receiver handlers must normalize all header keys to lowercase before lookup.
+
+### Projen-Managed Config Files
+
+This project uses Projen to generate `.eslintrc.json`, `package.json`, and other config files.
+Direct edits to generated files are overwritten on every `npx projen` run.
+All configuration changes (eslint ignore patterns, dependencies, bundled deps) must go through `.projenrc.ts`.
+
+### SDK Dependency Management
+
+New `@aws-sdk/client-*` packages must be added to both the `deps` and `bundledDeps` arrays in `.projenrc.ts`.
+Missing `bundledDeps` entries cause the SDK to be missing from Lambda deployment artifacts.
+
+### ESLint quote-props vs Prettier
+
+EventBridge events use hyphenated keys (`detail-type`) which force quoted properties.
+The `consistent-as-needed` quote-props rule conflicts with Prettier (which strips unnecessary quotes).
+Resolution: use `// prettier-ignore` directives on interfaces and objects containing hyphenated keys.
