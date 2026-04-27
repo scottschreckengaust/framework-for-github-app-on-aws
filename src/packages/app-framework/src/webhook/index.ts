@@ -4,6 +4,12 @@ import {
   RestApi,
   MethodLoggingLevel,
 } from 'aws-cdk-lib/aws-apigateway';
+import {
+  Alarm,
+  ComparisonOperator,
+  Metric,
+  TreatMissingData,
+} from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -143,6 +149,25 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
       },
       targets: [new LambdaFunction(stub.lambdaHandler)],
+    });
+
+    new Alarm(this, 'OversizedPayloadAlarm', {
+      alarmName: 'ai3-mvp-webhook-oversized-payload',
+      alarmDescription:
+        'API Gateway returned 4XX — may indicate a payload exceeding the 10MB limit (413)',
+      metric: new Metric({
+        namespace: 'AWS/ApiGateway',
+        metricName: '4XXError',
+        dimensionsMap: {
+          ApiName: 'ai3-mvp-webhook',
+        },
+        period: Duration.minutes(5),
+        statistic: 'Sum',
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
     Tags.of(this).add('ai3-mvp', 'WebhookIngestion');
