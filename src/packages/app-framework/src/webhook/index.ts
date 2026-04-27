@@ -18,7 +18,10 @@ import {
   BucketEncryption,
   BlockPublicAccess,
 } from 'aws-cdk-lib/aws-s3';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
+import { Topic } from 'aws-cdk-lib/aws-sns';
+import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import { Construct } from 'constructs';
 import { StubHandler } from './handlers/stubHandler';
@@ -26,6 +29,7 @@ import { WebhookReceiver } from './receiver/webhookReceiver';
 
 export interface WebhookIngestionProps {
   readonly webhookSecretArn: string;
+  readonly alertEmail?: string;
 }
 
 export class WebhookIngestion extends Construct {
@@ -151,7 +155,7 @@ export class WebhookIngestion extends Construct {
       targets: [new LambdaFunction(stub.lambdaHandler)],
     });
 
-    new Alarm(this, 'OversizedPayloadAlarm', {
+    const oversizedAlarm = new Alarm(this, 'OversizedPayloadAlarm', {
       alarmName: 'ai3-mvp-webhook-oversized-payload',
       alarmDescription:
         'API Gateway returned 4XX — may indicate a payload exceeding the 10MB limit (413)',
@@ -169,6 +173,16 @@ export class WebhookIngestion extends Construct {
       comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
       treatMissingData: TreatMissingData.NOT_BREACHING,
     });
+
+    if (props.alertEmail) {
+      const alertTopic = new Topic(this, 'AlertTopic', {
+        topicName: 'ai3-mvp-webhook-alerts',
+      });
+      alertTopic.addSubscription(
+        new EmailSubscription(props.alertEmail),
+      );
+      oversizedAlarm.addAlarmAction(new SnsAction(alertTopic));
+    }
 
     Tags.of(this).add('ai3-mvp', 'WebhookIngestion');
   }

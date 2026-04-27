@@ -46,9 +46,11 @@ export class TheAppFrameworkTestStack extends Stack {
     const webhookSecretArn = this.node.tryGetContext(
       'webhookSecretArn',
     ) as string;
+    const alertEmail = this.node.tryGetContext('alertEmail') as string;
     if (webhookSecretArn) {
       const webhook = new WebhookIngestion(this, 'WebhookIngestion', {
         webhookSecretArn,
+        alertEmail,
       });
       new CfnOutput(this, 'WebhookEndpoint', {
         value: webhook.apiEndpoint,
