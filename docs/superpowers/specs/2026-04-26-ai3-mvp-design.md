@@ -159,3 +159,51 @@ Missing `bundledDeps` entries cause the SDK to be missing from Lambda deployment
 EventBridge events use hyphenated keys (`detail-type`) which force quoted properties.
 The `consistent-as-needed` quote-props rule conflicts with Prettier (which strips unnecessary quotes).
 Resolution: use `// prettier-ignore` directives on interfaces and objects containing hyphenated keys.
+
+## Appendix: Webhook Redrive Procedure
+
+The idempotency table uses a 24-hour TTL on delivery IDs. To reprocess
+a webhook event within that window (e.g., after a bug fix or for
+debugging), an administrator must clear the idempotency record first,
+then redeliver from GitHub.
+
+### Steps
+
+1. **Find the delivery ID** from GitHub App settings → Advanced →
+   Recent Deliveries, or from CloudWatch Logs
+   (search for `deliveryId` in the receiver Lambda log group).
+
+2. **Delete the idempotency record:**
+
+```bash
+AWS_PROFILE=burner2 aws dynamodb delete-item \
+  --table-name <idempotency-table-name> \
+  --key '{"DeliveryId":{"S":"<delivery-id>"}}' \
+  --region us-east-1
+```
+
+To find the table name:
+
+```bash
+AWS_PROFILE=burner2 aws resourcegroupstaggingapi get-resources \
+  --tag-filters Key=ai3-mvp,Values=WebhookIngestion \
+  --resource-type-filters dynamodb:table \
+  --region us-east-1 \
+  --query 'ResourceTagMappingList[*].ResourceARN' --output text
+```
+
+3. **Redeliver from GitHub:** Go to the app's Advanced → Recent
+   Deliveries → find the delivery → click "Redeliver."
+
+4. **Verify:** Check the receiver Lambda CloudWatch logs for
+   `Event dispatched` with the matching delivery ID.
+
+### Notes
+
+- GitHub retains deliveries for 30 days.
+- The idempotency TTL is 24 hours — after that, redeliveries
+  process automatically without needing step 2.
+- After 24 hours but within 30 days, just redeliver from GitHub
+  directly.
+- Downstream handlers should also be idempotent by design as a
+  safety net (see Section 6: Idempotency).
