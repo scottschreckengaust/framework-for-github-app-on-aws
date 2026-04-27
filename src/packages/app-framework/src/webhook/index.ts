@@ -1,4 +1,4 @@
-import { RemovalPolicy, Tags } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
 import {
   LambdaIntegration,
   RestApi,
@@ -7,6 +7,11 @@ import {
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import {
+  Bucket,
+  BucketEncryption,
+  BlockPublicAccess,
+} from 'aws-cdk-lib/aws-s3';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import { Construct } from 'constructs';
@@ -41,11 +46,19 @@ export class WebhookIngestion extends Construct {
       timeToLiveAttribute: 'TTL',
     });
 
+    const payloadBucket = new Bucket(this, 'PayloadBucket', {
+      encryption: BucketEncryption.S3_MANAGED,
+      blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+      removalPolicy: RemovalPolicy.RETAIN,
+      lifecycleRules: [{ expiration: Duration.days(90), prefix: 'webhooks/' }],
+    });
+
     const receiver = new WebhookReceiver(this, 'Receiver', {
       webhookSecret,
       webhookSecretArn: props.webhookSecretArn,
       eventBus: this.eventBus,
       idempotencyTable,
+      payloadBucket,
     });
 
     const api = new RestApi(this, 'WebhookApi', {
