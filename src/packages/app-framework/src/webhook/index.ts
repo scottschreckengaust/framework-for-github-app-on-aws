@@ -105,8 +105,11 @@ export class WebhookIngestion extends Construct {
               name: 'AWSManagedRulesCommonRuleSet',
               excludedRules: [
                 { name: 'GenericLFI_BODY' },
-                { name: 'SizeRestrictions_BODY' },
                 { name: 'GenericRFI_BODY' },
+                { name: 'SizeRestrictions_BODY' },
+                { name: 'CrossSiteScripting_BODY' },
+                { name: 'EC2MetaDataSSRF_BODY' },
+                { name: 'RestrictedExtensions_URIPATH' },
               ],
             },
           },
