@@ -21,33 +21,53 @@ interface CommentEvent {
 
 async function getInstallationToken(): Promise<string | null> {
   const appId = process.env.APP_ID;
-  const endpoint = process.env.INSTALLATION_TOKEN_ENDPOINT;
+  const functionName = process.env.INSTALLATION_TOKEN_FUNCTION_NAME;
   const nodeId = process.env.NODE_ID;
-  if (!appId || !endpoint || !nodeId) return null;
+  if (!appId || !functionName || !nodeId) return null;
 
   try {
     const {
-      AppFrameworkClient,
-      GetInstallationTokenCommand,
-    } = require('@aws/app-framework-for-github-apps-on-aws-client');
-    const { Sha256 } = require('@aws-crypto/sha256-js');
-    const {
-      defaultProvider,
-    } = require('@aws-sdk/credential-provider-node');
-
-    const client = new AppFrameworkClient({
-      endpoint,
-      region: process.env.AWS_REGION || 'us-east-1',
-      credentials: defaultProvider(),
-      sha256: Sha256,
-    });
-    const resp = await client.send(
-      new GetInstallationTokenCommand({
-        appId: Number(appId),
-        nodeId,
+      LambdaClient,
+      InvokeCommand,
+    } = require('@aws-sdk/client-lambda');
+    const lambda = new LambdaClient({});
+    const event = {
+      version: '2.0',
+      routeKey: 'POST /tokens/installation',
+      rawPath: '/tokens/installation',
+      headers: { 'content-type': 'application/json' },
+      requestContext: {
+        http: { method: 'POST', path: '/tokens/installation' },
+        accountId: '361116840407',
+        stage: '$default',
+        requestId: 'internal',
+        authorizer: {
+          iam: {
+            accessKey: 'internal',
+            accountId: '361116840407',
+            userArn: 'internal',
+          },
+        },
+      },
+      body: JSON.stringify({ appId: Number(appId), nodeId }),
+      isBase64Encoded: false,
+    };
+    const resp = await lambda.send(
+      new InvokeCommand({
+        FunctionName: functionName,
+        InvocationType: 'RequestResponse',
+        Payload: JSON.stringify(event),
       }),
     );
-    return resp.installationToken || null;
+    const respPayload = JSON.parse(
+      new TextDecoder().decode(resp.Payload),
+    );
+    if (respPayload.statusCode !== 200) {
+      console.error('Installation token error', respPayload);
+      return null;
+    }
+    const body = JSON.parse(respPayload.body);
+    return body.installationToken || null;
   } catch (e) {
     console.error('Failed to get installation token', e);
     return null;

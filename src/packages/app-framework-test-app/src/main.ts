@@ -61,8 +61,8 @@ export class TheAppFrameworkTestStack extends Stack {
         oauthClientSecretArn,
         appId: '3501081',
         nodeId: 'O_kgDOD4tz5Q',
-        installationTokenEndpoint:
-          credentialManager.installationAccessTokenEndpoint,
+        installationTokenFunctionName:
+          credentialManager.installationAccessLambdaArn,
         installationTokenLambdaArn:
           credentialManager.installationAccessLambdaArn,
       });

@@ -39,7 +39,7 @@ export interface WebhookIngestionProps {
   readonly oauthClientSecretArn?: string;
   readonly appId?: string;
   readonly nodeId?: string;
-  readonly installationTokenEndpoint?: string;
+  readonly installationTokenFunctionName?: string;
   readonly installationTokenLambdaArn?: string;
 }
 
@@ -226,7 +226,7 @@ export class WebhookIngestion extends Construct {
         gitHubClientId: props.gitHubClientId,
         appId: props.appId || '',
         nodeId: props.nodeId || '',
-        installationTokenEndpoint: props.installationTokenEndpoint || '',
+        installationTokenFunctionName: props.installationTokenFunctionName || '',
         installationTokenLambdaArn: props.installationTokenLambdaArn || '',
       });
 

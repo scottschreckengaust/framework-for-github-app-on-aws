@@ -12,7 +12,7 @@ export interface CommentHandlerProps {
   readonly gitHubClientId: string;
   readonly appId: string;
   readonly nodeId: string;
-  readonly installationTokenEndpoint: string;
+  readonly installationTokenFunctionName: string;
   readonly installationTokenLambdaArn: string;
 }
 
@@ -24,19 +24,6 @@ export class CommentHandler extends Construct {
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
-      bundling: {
-        ...LAMBDA_DEFAULTS.bundling,
-        nodeModules: [
-          '@aws/app-framework-for-github-apps-on-aws-client',
-          '@aws-crypto/sha256-js',
-          '@aws-sdk/credential-provider-node',
-        ],
-        externalModules: [
-          '@aws/app-framework-for-github-apps-on-aws-client',
-          '@aws-crypto/sha256-js',
-          '@aws-sdk/credential-provider-node',
-        ],
-      },
       description: 'Handles issue_comment events mentioning @ai3-mvp',
       memorySize: 256,
       timeout: Duration.seconds(30),
@@ -48,20 +35,16 @@ export class CommentHandler extends Construct {
         GITHUB_CLIENT_ID: props.gitHubClientId,
         APP_ID: props.appId,
         NODE_ID: props.nodeId,
-        INSTALLATION_TOKEN_ENDPOINT: props.installationTokenEndpoint,
+        INSTALLATION_TOKEN_FUNCTION_NAME:
+          props.installationTokenFunctionName,
       },
     });
 
     this.lambdaHandler.addToRolePolicy(
       new PolicyStatement({
-        actions: ['lambda:InvokeFunctionUrl'],
+        actions: ['lambda:InvokeFunction'],
         effect: Effect.ALLOW,
         resources: [props.installationTokenLambdaArn],
-        conditions: {
-          StringEquals: {
-            'lambda:FunctionUrlAuthType': 'AWS_IAM',
-          },
-        },
       }),
     );
   }
