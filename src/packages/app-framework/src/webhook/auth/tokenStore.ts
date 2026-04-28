@@ -38,7 +38,6 @@ export async function getToken(gitHubUserId: number): Promise<UserToken | null> 
     }),
   );
   if (!resp.Item) return null;
-  const keyArn = getKeyArn();
   return {
     gitHubUserId: Number(resp.Item.GitHubUserId.N),
     login: resp.Item.Login.S!,
