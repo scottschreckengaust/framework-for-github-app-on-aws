@@ -11,11 +11,47 @@ interface CommentEvent {
     action: string;
     sender: { login: string; id: number };
     repository: { full_name: string };
+    installation?: { id: number };
     payload: {
       comment: { body: string };
       issue: { number: number };
     };
   };
+}
+
+async function getInstallationToken(): Promise<string | null> {
+  const appId = process.env.APP_ID;
+  const endpoint = process.env.INSTALLATION_TOKEN_ENDPOINT;
+  const nodeId = process.env.NODE_ID;
+  if (!appId || !endpoint || !nodeId) return null;
+
+  try {
+    const {
+      AppFrameworkClient,
+      GetInstallationTokenCommand,
+    } = require('@aws/app-framework-for-github-apps-on-aws-client');
+    const { Sha256 } = require('@aws-crypto/sha256-js');
+    const {
+      defaultProvider,
+    } = require('@aws-sdk/credential-provider-node');
+
+    const client = new AppFrameworkClient({
+      endpoint,
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: defaultProvider(),
+      sha256: Sha256,
+    });
+    const resp = await client.send(
+      new GetInstallationTokenCommand({
+        appId: Number(appId),
+        nodeId,
+      }),
+    );
+    return resp.installationToken || null;
+  } catch (e) {
+    console.error('Failed to get installation token', e);
+    return null;
+  }
 }
 
 export const handler = async (event: CommentEvent): Promise<void> => {
@@ -32,7 +68,15 @@ export const handler = async (event: CommentEvent): Promise<void> => {
 
   const [owner, repo] = detail.repository.full_name.split('/');
   const orgName = process.env.ORG_NAME || owner;
-  const installationToken = 'placeholder';
+
+  const installationToken = await getInstallationToken();
+
+  if (!installationToken) {
+    console.error('No installation token available', {
+      deliveryId: detail.delivery_id,
+    });
+    return;
+  }
 
   const authResult = await authorizeUser({
     senderLogin: detail.sender.login,

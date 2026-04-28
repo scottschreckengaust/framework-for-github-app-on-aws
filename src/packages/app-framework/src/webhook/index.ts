@@ -37,6 +37,10 @@ export interface WebhookIngestionProps {
   readonly alertEmail?: string;
   readonly gitHubClientId?: string;
   readonly oauthClientSecretArn?: string;
+  readonly appId?: string;
+  readonly nodeId?: string;
+  readonly installationTokenEndpoint?: string;
+  readonly installationTokenLambdaArn?: string;
 }
 
 export class WebhookIngestion extends Construct {
@@ -220,6 +224,10 @@ export class WebhookIngestion extends Construct {
         authLoginUrl,
         oauthClientSecretArn: props.oauthClientSecretArn,
         gitHubClientId: props.gitHubClientId,
+        appId: props.appId || '',
+        nodeId: props.nodeId || '',
+        installationTokenEndpoint: props.installationTokenEndpoint || '',
+        installationTokenLambdaArn: props.installationTokenLambdaArn || '',
       });
 
       this.userTokensTable.grantReadWriteData(comment.lambdaHandler);

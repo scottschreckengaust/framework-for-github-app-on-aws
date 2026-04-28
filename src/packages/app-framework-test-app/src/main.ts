@@ -59,6 +59,12 @@ export class TheAppFrameworkTestStack extends Stack {
         alertEmail,
         gitHubClientId,
         oauthClientSecretArn,
+        appId: '3501081',
+        nodeId: 'O_kgDOD4tz5Q',
+        installationTokenEndpoint:
+          credentialManager.installationAccessTokenEndpoint,
+        installationTokenLambdaArn:
+          credentialManager.installationAccessLambdaArn,
       });
       new CfnOutput(this, 'WebhookEndpoint', {
         value: webhook.apiEndpoint,

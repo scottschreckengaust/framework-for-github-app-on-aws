@@ -1,4 +1,5 @@
 import { Duration } from 'aws-cdk-lib';
+import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
@@ -9,6 +10,10 @@ export interface CommentHandlerProps {
   readonly authLoginUrl: string;
   readonly oauthClientSecretArn: string;
   readonly gitHubClientId: string;
+  readonly appId: string;
+  readonly nodeId: string;
+  readonly installationTokenEndpoint: string;
+  readonly installationTokenLambdaArn: string;
 }
 
 export class CommentHandler extends Construct {
@@ -19,6 +24,19 @@ export class CommentHandler extends Construct {
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
+      bundling: {
+        ...LAMBDA_DEFAULTS.bundling,
+        nodeModules: [
+          '@aws/app-framework-for-github-apps-on-aws-client',
+          '@aws-crypto/sha256-js',
+          '@aws-sdk/credential-provider-node',
+        ],
+        externalModules: [
+          '@aws/app-framework-for-github-apps-on-aws-client',
+          '@aws-crypto/sha256-js',
+          '@aws-sdk/credential-provider-node',
+        ],
+      },
       description: 'Handles issue_comment events mentioning @ai3-mvp',
       memorySize: 256,
       timeout: Duration.seconds(30),
@@ -28,7 +46,23 @@ export class CommentHandler extends Construct {
         AUTH_LOGIN_URL: props.authLoginUrl,
         OAUTH_CLIENT_SECRET_ARN: props.oauthClientSecretArn,
         GITHUB_CLIENT_ID: props.gitHubClientId,
+        APP_ID: props.appId,
+        NODE_ID: props.nodeId,
+        INSTALLATION_TOKEN_ENDPOINT: props.installationTokenEndpoint,
       },
     });
+
+    this.lambdaHandler.addToRolePolicy(
+      new PolicyStatement({
+        actions: ['lambda:InvokeFunctionUrl'],
+        effect: Effect.ALLOW,
+        resources: [props.installationTokenLambdaArn],
+        conditions: {
+          StringEquals: {
+            'lambda:FunctionUrlAuthType': 'AWS_IAM',
+          },
+        },
+      }),
+    );
   }
 }
