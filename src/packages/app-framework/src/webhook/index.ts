@@ -27,7 +27,12 @@ import { Construct } from 'constructs';
 import { AlertHandler } from './alertHandler';
 import { OAuthCallback } from './auth/oauthCallback';
 import { OAuthLogin } from './auth/oauthLogin';
+import { CheckRunHandler } from './handlers/checkRunHandler';
 import { CommentHandler } from './handlers/commentHandler';
+import { DeploymentHandler } from './handlers/deploymentHandler';
+import { DiscussionHandler } from './handlers/discussionHandler';
+import { PRHandler } from './handlers/prHandler';
+import { PushHandler } from './handlers/pushHandler';
 import { StubHandler } from './handlers/stubHandler';
 import { JobsTable } from './orchestration/jobsTable';
 import { WebhookReceiver } from './receiver/webhookReceiver';
@@ -243,6 +248,66 @@ export class WebhookIngestion extends Construct {
         })],
       });
     }
+
+    const prHandler = new PRHandler(this, 'PRHandler');
+    new Rule(this, 'PullRequestRule', {
+      eventBus: this.eventBus,
+      eventPattern: {
+        source: ['github'],
+        detailType: ['pull_request'],
+      },
+      targets: [new LambdaFunction(prHandler.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
+    });
+
+    const pushHandler = new PushHandler(this, 'PushHandler');
+    new Rule(this, 'PushRule', {
+      eventBus: this.eventBus,
+      eventPattern: {
+        source: ['github'],
+        detailType: ['push'],
+      },
+      targets: [new LambdaFunction(pushHandler.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
+    });
+
+    const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler');
+    new Rule(this, 'CheckRunRule', {
+      eventBus: this.eventBus,
+      eventPattern: {
+        source: ['github'],
+        detailType: ['check_run'],
+      },
+      targets: [new LambdaFunction(checkRunHandler.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
+    });
+
+    const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler');
+    new Rule(this, 'DeploymentRule', {
+      eventBus: this.eventBus,
+      eventPattern: {
+        source: ['github'],
+        detailType: ['deployment'],
+      },
+      targets: [new LambdaFunction(deploymentHandler.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
+    });
+
+    const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler');
+    new Rule(this, 'DiscussionRule', {
+      eventBus: this.eventBus,
+      eventPattern: {
+        source: ['github'],
+        detailType: ['discussion'],
+      },
+      targets: [new LambdaFunction(discussionHandler.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
+    });
 
     new Rule(this, 'AllEventsRule', {
       eventBus: this.eventBus,
