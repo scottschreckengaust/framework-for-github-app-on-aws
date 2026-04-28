@@ -1,4 +1,4 @@
-import { Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
+import { Aws, Duration, RemovalPolicy, Tags } from 'aws-cdk-lib';
 import {
   LambdaIntegration,
   RestApi,
@@ -24,17 +24,22 @@ import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import { Construct } from 'constructs';
+import { OAuthCallback } from './auth/oauthCallback';
+import { OAuthLogin } from './auth/oauthLogin';
 import { StubHandler } from './handlers/stubHandler';
 import { WebhookReceiver } from './receiver/webhookReceiver';
 
 export interface WebhookIngestionProps {
   readonly webhookSecretArn: string;
   readonly alertEmail?: string;
+  readonly gitHubClientId?: string;
+  readonly oauthClientSecretArn?: string;
 }
 
 export class WebhookIngestion extends Construct {
   readonly eventBus: EventBus;
   readonly apiEndpoint: string;
+  readonly userTokensTable?: Table;
 
   constructor(scope: Construct, id: string, props: WebhookIngestionProps) {
     super(scope, id);
@@ -144,6 +149,57 @@ export class WebhookIngestion extends Construct {
       resourceArn: api.deploymentStage.stageArn,
       webAclArn: webAcl.attrArn,
     });
+
+    if (props.gitHubClientId && props.oauthClientSecretArn) {
+      const oauthClientSecret = Secret.fromSecretCompleteArn(
+        this,
+        'OAuthClientSecret',
+        props.oauthClientSecretArn,
+      );
+
+      const authStateTable = new Table(this, 'AuthStateTable', {
+        partitionKey: { name: 'StateNonce', type: AttributeType.STRING },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        removalPolicy: RemovalPolicy.DESTROY,
+        timeToLiveAttribute: 'TTL',
+      });
+
+      this.userTokensTable = new Table(this, 'UserTokensTable', {
+        partitionKey: {
+          name: 'GitHubUserId',
+          type: AttributeType.NUMBER,
+        },
+        billingMode: BillingMode.PAY_PER_REQUEST,
+        removalPolicy: RemovalPolicy.RETAIN,
+        pointInTimeRecoverySpecification: {
+          pointInTimeRecoveryEnabled: true,
+        },
+      });
+
+      const callbackUrl = `https://${api.restApiId}.execute-api.${Aws.REGION}.amazonaws.com/prod/auth/callback`;
+
+      const login = new OAuthLogin(this, 'OAuthLogin', {
+        authStateTable,
+        gitHubClientId: props.gitHubClientId,
+        oauthCallbackUrl: callbackUrl,
+      });
+
+      const callback = new OAuthCallback(this, 'OAuthCallback', {
+        authStateTable,
+        userTokensTable: this.userTokensTable,
+        gitHubClientId: props.gitHubClientId,
+        oauthClientSecret,
+        oauthClientSecretArn: props.oauthClientSecretArn,
+      });
+
+      const authResource = api.root.addResource('auth');
+      authResource
+        .addResource('login')
+        .addMethod('GET', new LambdaIntegration(login.lambdaHandler));
+      authResource
+        .addResource('callback')
+        .addMethod('GET', new LambdaIntegration(callback.lambdaHandler));
+    }
 
     const stub = new StubHandler(this, 'StubHandler');
 
