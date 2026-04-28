@@ -37,6 +37,7 @@
   },
   "ignorePatterns": [
     "src/packages/smithy/build/**/*",
+    "docs/superpowers/**/*",
     "!.projenrc.ts",
     "!projenrc/**/*.ts"
   ],

@@ -1,6 +1,16 @@
 {
   "dependencies": [
     {
+      "name": "@aws-sdk/client-s3",
+      "version": "3.777.0",
+      "type": "build"
+    },
+    {
+      "name": "@aws-sdk/client-sfn",
+      "version": "3.777.0",
+      "type": "build"
+    },
+    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"
@@ -96,7 +106,15 @@
       "type": "bundled"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "type": "bundled"
+    },
+    {
       "name": "@aws-sdk/client-kms",
+      "type": "bundled"
+    },
+    {
+      "name": "@aws-sdk/client-secrets-manager",
       "type": "bundled"
     },
     {
@@ -154,7 +172,15 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-eventbridge",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-kms",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-secrets-manager",
       "type": "runtime"
     },
     {

@@ -1,4 +1,7 @@
-import { CredentialManager } from '@aws/app-framework-for-github-apps-on-aws';
+import {
+  CredentialManager,
+  WebhookIngestion,
+} from '@aws/app-framework-for-github-apps-on-aws';
 import { App, Stack, StackProps, CfnOutput, Aws } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 // CDK App entry for @aws/app-framework-for-github-apps-on-aws acceptance test.
@@ -23,10 +26,51 @@ export class TheAppFrameworkTestStack extends Stack {
       value: installationAccessTokenUrl,
       exportName: 'InstallationAccessTokenEndpoint',
     });
+    new CfnOutput(this, 'RefreshCachedDataEndpoint', {
+      value: credentialManager.refreshCachedDataEndpoint,
+      exportName: 'RefreshCachedDataEndpoint',
+    });
+    new CfnOutput(this, 'InstallationRecordEndpoint', {
+      value: credentialManager.installationRecordEndpoint,
+      exportName: 'InstallationRecordEndpoint',
+    });
+    new CfnOutput(this, 'InstallationsEndpoint', {
+      value: credentialManager.installationsEndpoint,
+      exportName: 'InstallationsEndpoint',
+    });
     new CfnOutput(this, 'Region', {
       value: Aws.REGION,
       exportName: 'Region',
     });
+
+    const webhookSecretArn = this.node.tryGetContext(
+      'webhookSecretArn',
+    ) as string;
+    const alertEmail = this.node.tryGetContext('alertEmail') as string;
+    const gitHubClientId = this.node.tryGetContext(
+      'gitHubClientId',
+    ) as string;
+    const oauthClientSecretArn = this.node.tryGetContext(
+      'oauthClientSecretArn',
+    ) as string;
+    if (webhookSecretArn) {
+      const webhook = new WebhookIngestion(this, 'WebhookIngestion', {
+        webhookSecretArn,
+        alertEmail,
+        gitHubClientId,
+        oauthClientSecretArn,
+        appId: '3501081',
+        nodeId: 'O_kgDOD4tz5Q',
+        installationTokenFunctionName:
+          credentialManager.installationAccessLambdaArn,
+        installationTokenLambdaArn:
+          credentialManager.installationAccessLambdaArn,
+      });
+      new CfnOutput(this, 'WebhookEndpoint', {
+        value: webhook.apiEndpoint,
+        exportName: 'WebhookEndpoint',
+      });
+    }
   }
 }
 
