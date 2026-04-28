@@ -1,4 +1,8 @@
-import { getToken } from './tokenStore';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
+import { getToken, putToken } from './tokenStore';
 
 export interface AuthorizeInput {
   senderLogin: string;
@@ -13,15 +17,63 @@ export interface AuthResult {
   reason?: string;
   needsAuth?: boolean;
   userToken?: {
-    encryptedAccessToken: string;
-    encryptedRefreshToken: string;
+    accessToken: string;
     tokenExpiry: string;
   };
 }
 
 const WRITE_PERMISSIONS = new Set(['write', 'admin', 'maintain']);
+const REFRESH_BUFFER_MS = 5 * 60 * 1000;
 
-export async function authorizeUser(input: AuthorizeInput): Promise<AuthResult> {
+const secretsClient = new SecretsManagerClient({});
+let cachedClientSecret: string | undefined;
+
+async function getClientSecret(): Promise<string | null> {
+  if (cachedClientSecret) return cachedClientSecret;
+  const arn = process.env.OAUTH_CLIENT_SECRET_ARN;
+  if (!arn) return null;
+  const resp = await secretsClient.send(
+    new GetSecretValueCommand({ SecretId: arn }),
+  );
+  cachedClientSecret = resp.SecretString;
+  return cachedClientSecret || null;
+}
+
+async function refreshAccessToken(
+  refreshToken: string,
+  clientId: string,
+  clientSecret: string,
+): Promise<{
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+} | null> {
+  const resp = await fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken,
+    }),
+  });
+  if (!resp.ok) return null;
+  const data = (await resp.json()) as Record<string, unknown>;
+  if (data.error) return null;
+  return data as {
+    access_token: string;
+    refresh_token: string;
+    expires_in: number;
+  };
+}
+
+export async function authorizeUser(
+  input: AuthorizeInput,
+): Promise<AuthResult> {
   const orgCheckResp = await fetch(
     `https://api.github.com/orgs/${input.orgName}/members/${input.senderLogin}`,
     {
@@ -66,12 +118,54 @@ export async function authorizeUser(input: AuthorizeInput): Promise<AuthResult> 
     return { authorized: false, needsAuth: true };
   }
 
+  let accessToken = token.encryptedAccessToken;
+  let tokenExpiry = token.tokenExpiry;
+
+  const expiresAt = new Date(tokenExpiry).getTime();
+  const isExpired = Date.now() > expiresAt - REFRESH_BUFFER_MS;
+
+  if (isExpired) {
+    const clientId = process.env.GITHUB_CLIENT_ID;
+    const clientSecret = await getClientSecret();
+
+    if (!clientId || !clientSecret || !token.encryptedRefreshToken) {
+      return { authorized: false, needsAuth: true };
+    }
+
+    const refreshed = await refreshAccessToken(
+      token.encryptedRefreshToken,
+      clientId,
+      clientSecret,
+    );
+
+    if (!refreshed) {
+      return { authorized: false, needsAuth: true };
+    }
+
+    tokenExpiry = new Date(
+      Date.now() + refreshed.expires_in * 1000,
+    ).toISOString();
+    accessToken = refreshed.access_token;
+
+    await putToken({
+      ...token,
+      encryptedAccessToken: refreshed.access_token,
+      encryptedRefreshToken: refreshed.refresh_token,
+      tokenExpiry,
+      lastUsed: new Date().toISOString(),
+    });
+
+    console.log('Token refreshed', {
+      userId: input.senderId,
+      login: input.senderLogin,
+    });
+  }
+
   return {
     authorized: true,
     userToken: {
-      encryptedAccessToken: token.encryptedAccessToken,
-      encryptedRefreshToken: token.encryptedRefreshToken,
-      tokenExpiry: token.tokenExpiry,
+      accessToken,
+      tokenExpiry,
     },
   };
 }
