@@ -259,6 +259,28 @@ export class WebhookIngestion extends Construct {
           deadLetterQueue: alert.dlq,
         })],
       });
+
+      new Rule(this, 'CommitCommentRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['commit_comment'],
+        },
+        targets: [new LambdaFunction(comment.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        })],
+      });
+
+      new Rule(this, 'PRReviewCommentRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['pull_request_review_comment'],
+        },
+        targets: [new LambdaFunction(comment.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        })],
+      });
     }
 
     const prHandler = new PRHandler(this, 'PRHandler');
