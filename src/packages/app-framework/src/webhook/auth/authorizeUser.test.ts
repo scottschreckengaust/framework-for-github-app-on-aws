@@ -8,7 +8,9 @@ jest.mock('./tokenStore', () => ({
 }));
 
 jest.mock('@aws-sdk/client-secrets-manager', () => ({
-  SecretsManagerClient: jest.fn().mockImplementation(() => ({ send: jest.fn().mockResolvedValue({ SecretString: 'test-client-secret' }) })),
+  SecretsManagerClient: jest.fn().mockImplementation(() => ({
+    send: jest.fn().mockResolvedValue({ SecretString: 'test-client-secret' }),
+  })),
   GetSecretValueCommand: jest.fn(),
 }));
 
@@ -21,7 +23,8 @@ describe('authorizeUser', () => {
     mockPutToken.mockReset();
     mockFetch.mockReset();
     process.env.GITHUB_CLIENT_ID = 'test-client-id';
-    process.env.OAUTH_CLIENT_SECRET_ARN = 'arn:aws:secretsmanager:us-east-1:123:secret:test';
+    process.env.OAUTH_CLIENT_SECRET_ARN =
+      'arn:aws:secretsmanager:us-east-1:123:secret:test';
   });
 
   it('rejects user not in sbalswa org', async () => {
@@ -38,12 +41,10 @@ describe('authorizeUser', () => {
   });
 
   it('rejects user without repo write access', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ status: 204 })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ permission: 'read' }),
-      });
+    mockFetch.mockResolvedValueOnce({ status: 204 }).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ permission: 'read' }),
+    });
     const result = await authorizeUser({
       senderLogin: 'reader',
       senderId: 11111,
@@ -56,12 +57,10 @@ describe('authorizeUser', () => {
   });
 
   it('returns needsAuth when user has no OAuth token', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ status: 204 })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ permission: 'write' }),
-      });
+    mockFetch.mockResolvedValueOnce({ status: 204 }).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ permission: 'write' }),
+    });
     mockGetToken.mockResolvedValue(null);
     const result = await authorizeUser({
       senderLogin: 'newuser',
@@ -75,12 +74,10 @@ describe('authorizeUser', () => {
   });
 
   it('authorizes user with valid (non-expired) token', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ status: 204 })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ permission: 'admin' }),
-      });
+    mockFetch.mockResolvedValueOnce({ status: 204 }).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ permission: 'admin' }),
+    });
     mockGetToken.mockResolvedValue({
       gitHubUserId: 33333,
       login: 'admin-user',

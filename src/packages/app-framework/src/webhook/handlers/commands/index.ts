@@ -1,6 +1,6 @@
-import { CommandHandler } from './types';
-import { handleHelp } from './help';
 import { handleEcho } from './echo';
+import { handleHelp } from './help';
+import { CommandHandler } from './types';
 
 export { CommandContext, CommandHandler } from './types';
 
@@ -9,7 +9,9 @@ const commands: Record<string, CommandHandler> = {
   echo: handleEcho,
 };
 
-export function getCommandHandler(commandName: string): CommandHandler | undefined {
+export function getCommandHandler(
+  commandName: string,
+): CommandHandler | undefined {
   return commands[commandName.toLowerCase()];
 }
 

@@ -1,7 +1,7 @@
 // prettier-ignore
 interface EventDetail {
   'detail-type': string;
-  detail: {
+  'detail': {
     delivery_id: string;
     action?: string;
     sender?: { login: string };

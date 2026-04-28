@@ -1,5 +1,5 @@
-import { postComment } from '../../orchestration/reportComment';
 import { CommandContext } from './types';
+import { postComment } from '../../orchestration/reportComment';
 
 export async function handleEcho(ctx: CommandContext): Promise<void> {
   await postComment({

@@ -1,5 +1,5 @@
-import { postComment } from '../../orchestration/reportComment';
 import { CommandContext } from './types';
+import { postComment } from '../../orchestration/reportComment';
 
 const AVAILABLE_COMMANDS = [
   '`help` - List available commands',

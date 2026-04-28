@@ -30,7 +30,9 @@ function getKeyArn(): string {
   return arn;
 }
 
-export async function getToken(gitHubUserId: number): Promise<UserToken | null> {
+export async function getToken(
+  gitHubUserId: number,
+): Promise<UserToken | null> {
   const resp = await client.send(
     new GetItemCommand({
       TableName: getTableName(),
@@ -42,7 +44,9 @@ export async function getToken(gitHubUserId: number): Promise<UserToken | null> 
     gitHubUserId: Number(resp.Item.GitHubUserId.N),
     login: resp.Item.Login.S!,
     encryptedAccessToken: await decryptToken(resp.Item.EncryptedAccessToken.S!),
-    encryptedRefreshToken: await decryptToken(resp.Item.EncryptedRefreshToken.S!),
+    encryptedRefreshToken: await decryptToken(
+      resp.Item.EncryptedRefreshToken.S!,
+    ),
     tokenExpiry: resp.Item.TokenExpiry.S!,
     scopes: resp.Item.Scopes.S!,
     lastUsed: resp.Item.LastUsed.S!,

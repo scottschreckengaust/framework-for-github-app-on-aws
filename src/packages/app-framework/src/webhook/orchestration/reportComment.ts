@@ -21,9 +21,10 @@ export async function postComment(input: PostCommentInput): Promise<number> {
     `https://api.github.com/repos/${input.owner}/${input.repo}/issues/${input.issueNumber}/comments`,
     {
       method: 'POST',
+      // prettier-ignore
       headers: {
-        Authorization: `Bearer ${input.token}`,
-        Accept: 'application/vnd.github+json',
+        'Authorization': `Bearer ${input.token}`,
+        'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ body: input.body }),
@@ -41,9 +42,10 @@ export async function updateComment(input: UpdateCommentInput): Promise<void> {
     `https://api.github.com/repos/${input.owner}/${input.repo}/issues/comments/${input.commentId}`,
     {
       method: 'PATCH',
+      // prettier-ignore
       headers: {
-        Authorization: `Bearer ${input.token}`,
-        Accept: 'application/vnd.github+json',
+        'Authorization': `Bearer ${input.token}`,
+        'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ body: input.body }),

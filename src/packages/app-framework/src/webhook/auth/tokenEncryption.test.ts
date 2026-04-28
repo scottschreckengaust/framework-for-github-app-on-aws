@@ -14,7 +14,10 @@ describe('tokenEncryption', () => {
     mockSend.mockResolvedValue({
       CiphertextBlob: Buffer.from('encrypted-data'),
     });
-    const result = await encryptToken('ghu_mytoken', 'arn:aws:kms:us-east-1:123:key/abc');
+    const result = await encryptToken(
+      'ghu_mytoken',
+      'arn:aws:kms:us-east-1:123:key/abc',
+    );
     expect(result).toBe(Buffer.from('encrypted-data').toString('base64'));
     expect(mockSend).toHaveBeenCalledTimes(1);
   });
@@ -23,7 +26,9 @@ describe('tokenEncryption', () => {
     mockSend.mockResolvedValue({
       Plaintext: Buffer.from('ghu_mytoken', 'utf8'),
     });
-    const result = await decryptToken(Buffer.from('encrypted-data').toString('base64'));
+    const result = await decryptToken(
+      Buffer.from('encrypted-data').toString('base64'),
+    );
     expect(result).toBe('ghu_mytoken');
     expect(mockSend).toHaveBeenCalledTimes(1);
   });

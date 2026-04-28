@@ -44,7 +44,7 @@ describe('commentHandler', () => {
     // prettier-ignore
     const event = {
       'detail-type': 'issue_comment',
-      detail: {
+      'detail': {
         delivery_id: 'del-1',
         action: 'created',
         sender: { login: 'someone', id: 222 },
@@ -69,7 +69,7 @@ describe('commentHandler', () => {
     // prettier-ignore
     const event = {
       'detail-type': 'issue_comment',
-      detail: {
+      'detail': {
         delivery_id: 'del-2',
         action: 'created',
         sender: { login: 'newuser', id: 111 },
@@ -101,7 +101,7 @@ describe('commentHandler', () => {
     // prettier-ignore
     const event = {
       'detail-type': 'issue_comment',
-      detail: {
+      'detail': {
         delivery_id: 'del-3',
         action: 'created',
         sender: { login: 'admin', id: 333 },

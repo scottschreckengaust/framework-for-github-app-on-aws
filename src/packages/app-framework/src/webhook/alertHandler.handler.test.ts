@@ -9,10 +9,11 @@ describe('alertHandler', () => {
     const event = {
       Records: [
         {
+          // prettier-ignore
           body: JSON.stringify({
-            source: 'github',
+            'source': 'github',
             'detail-type': 'push',
-            detail: { delivery_id: 'failed-1' },
+            'detail': { delivery_id: 'failed-1' },
           }),
           messageId: 'msg-1',
         },

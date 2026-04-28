@@ -1,13 +1,17 @@
+import {
+  getCommandHandler,
+  getDefaultHandler,
+  CommandContext,
+} from './commands';
 import { authorizeUser } from '../auth/authorizeUser';
 import { postComment } from '../orchestration/reportComment';
-import { getCommandHandler, getDefaultHandler, CommandContext } from './commands';
 
 const BOT_MENTION = '@ai3-mvp';
 
 // prettier-ignore
 interface CommentEvent {
   'detail-type': string;
-  detail: {
+  'detail': {
     delivery_id: string;
     action: string;
     sender: { login: string; id: number };
@@ -27,10 +31,11 @@ async function getInstallationToken(): Promise<string | null> {
   if (!appId || !functionName || !nodeId) return null;
 
   try {
-    const {
-      LambdaClient,
-      InvokeCommand,
-    } = require('@aws-sdk/client-lambda');
+    /* eslint-disable import/no-unresolved */
+    const { LambdaClient, InvokeCommand } = await import(
+      '@aws-sdk/client-lambda'
+    );
+    /* eslint-enable import/no-unresolved */
     const lambda = new LambdaClient({});
     const event = {
       version: '2.0',
@@ -60,9 +65,7 @@ async function getInstallationToken(): Promise<string | null> {
         Payload: JSON.stringify(event),
       }),
     );
-    const respPayload = JSON.parse(
-      new TextDecoder().decode(resp.Payload),
-    );
+    const respPayload = JSON.parse(new TextDecoder().decode(resp.Payload));
     if (respPayload.statusCode !== 200) {
       console.error('Installation token error', respPayload);
       return null;
@@ -141,8 +144,8 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     sender: detail.sender.login,
   };
 
-  const handler = getCommandHandler(cmdName) || getDefaultHandler();
-  await handler(ctx);
+  const commandHandler = getCommandHandler(cmdName) || getDefaultHandler();
+  await commandHandler(ctx);
 
   console.log(
     JSON.stringify({

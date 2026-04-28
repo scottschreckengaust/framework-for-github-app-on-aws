@@ -1,6 +1,11 @@
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { DynamoDBClient, PutItemCommand, AttributeValue } from '@aws-sdk/client-dynamodb';
 import { randomUUID } from 'crypto';
+import {
+  DynamoDBClient,
+  PutItemCommand,
+  AttributeValue,
+} from '@aws-sdk/client-dynamodb';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 
 const sfnClient = new SFNClient({});
 const dynamoClient = new DynamoDBClient({});

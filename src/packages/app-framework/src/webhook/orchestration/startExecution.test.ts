@@ -6,7 +6,9 @@ jest.mock('@aws-sdk/client-sfn', () => ({
 
 const mockDynamoSend = jest.fn();
 jest.mock('@aws-sdk/client-dynamodb', () => ({
-  DynamoDBClient: jest.fn().mockImplementation(() => ({ send: mockDynamoSend })),
+  DynamoDBClient: jest
+    .fn()
+    .mockImplementation(() => ({ send: mockDynamoSend })),
   PutItemCommand: jest.fn().mockImplementation((input) => ({ input })),
 }));
 

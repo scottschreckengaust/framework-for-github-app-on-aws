@@ -36,8 +36,7 @@ export class CommentHandler extends Construct {
         GITHUB_CLIENT_ID: props.gitHubClientId,
         APP_ID: props.appId,
         NODE_ID: props.nodeId,
-        INSTALLATION_TOKEN_FUNCTION_NAME:
-          props.installationTokenFunctionName,
+        INSTALLATION_TOKEN_FUNCTION_NAME: props.installationTokenFunctionName,
         ...(props.tokenEncryptionKeyArn && {
           TOKEN_ENCRYPTION_KEY_ARN: props.tokenEncryptionKeyArn,
         }),
