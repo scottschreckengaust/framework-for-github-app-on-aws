@@ -95,19 +95,19 @@ export const handler = async (
   const body = event.body || '';
 
   if (!deliveryId || !eventType) {
-    return { statusCode: 400, body: 'Missing required GitHub headers' };
+    return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'error', reason: 'missing_headers' }) };
   }
 
   const secret = await getWebhookSecret();
   if (!verifySignature(body, signature, secret)) {
     console.error('Webhook signature verification failed', { deliveryId });
-    return { statusCode: 401, body: 'Invalid signature' };
+    return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'error', reason: 'invalid_signature', deliveryId }) };
   }
 
   const isNew = await checkIdempotency(deliveryId);
   if (!isNew) {
     console.log('Duplicate delivery, skipping', { deliveryId });
-    return { statusCode: 200, body: 'Duplicate delivery' };
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'duplicate', deliveryId }) };
   }
 
   const busName = process.env[WebhookEnvironmentVariables.EVENT_BUS_NAME];
@@ -158,5 +158,5 @@ export const handler = async (
     payloadComplete: detail.payload_complete,
     s3Key: s3Ref.key,
   });
-  return { statusCode: 200, body: 'OK' };
+  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'ok', deliveryId, eventType }) };
 };
