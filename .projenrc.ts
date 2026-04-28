@@ -225,7 +225,7 @@ createPackage({
     "@octokit/rest",
     "@octokit/types",
   ],
-  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-s3@3.777.0"],
+  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-s3@3.777.0", "@aws-sdk/client-sfn@3.777.0"],
   bundledDeps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",

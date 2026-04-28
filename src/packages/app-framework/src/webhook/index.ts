@@ -24,9 +24,12 @@ import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import { Construct } from 'constructs';
+import { AlertHandler } from './alertHandler';
 import { OAuthCallback } from './auth/oauthCallback';
 import { OAuthLogin } from './auth/oauthLogin';
+import { CommentHandler } from './handlers/commentHandler';
 import { StubHandler } from './handlers/stubHandler';
+import { JobsTable } from './orchestration/jobsTable';
 import { WebhookReceiver } from './receiver/webhookReceiver';
 
 export interface WebhookIngestionProps {
@@ -40,6 +43,7 @@ export class WebhookIngestion extends Construct {
   readonly eventBus: EventBus;
   readonly apiEndpoint: string;
   readonly userTokensTable?: Table;
+  readonly jobsTable?: Table;
 
   constructor(scope: Construct, id: string, props: WebhookIngestionProps) {
     super(scope, id);
@@ -201,14 +205,45 @@ export class WebhookIngestion extends Construct {
         .addMethod('GET', new LambdaIntegration(callback.lambdaHandler));
     }
 
+    const jobs = new JobsTable(this, 'Jobs');
+    this.jobsTable = jobs.table;
+
+    const alert = new AlertHandler(this, 'Alert');
+
     const stub = new StubHandler(this, 'StubHandler');
+
+    if (props.gitHubClientId && props.oauthClientSecretArn && this.userTokensTable) {
+      const authLoginUrl = `https://${api.restApiId}.execute-api.${Aws.REGION}.amazonaws.com/prod/auth/login`;
+      const comment = new CommentHandler(this, 'CommentHandler', {
+        userTokensTableName: this.userTokensTable.tableName,
+        orgName: 'sbalswa',
+        authLoginUrl,
+        oauthClientSecretArn: props.oauthClientSecretArn,
+        gitHubClientId: props.gitHubClientId,
+      });
+
+      this.userTokensTable.grantReadWriteData(comment.lambdaHandler);
+
+      new Rule(this, 'IssueCommentRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['issue_comment'],
+        },
+        targets: [new LambdaFunction(comment.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        })],
+      });
+    }
 
     new Rule(this, 'AllEventsRule', {
       eventBus: this.eventBus,
       eventPattern: {
         source: ['github'],
       },
-      targets: [new LambdaFunction(stub.lambdaHandler)],
+      targets: [new LambdaFunction(stub.lambdaHandler, {
+        deadLetterQueue: alert.dlq,
+      })],
     });
 
     const oversizedAlarm = new Alarm(this, 'OversizedPayloadAlarm', {
