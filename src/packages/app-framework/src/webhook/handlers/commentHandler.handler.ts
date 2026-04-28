@@ -31,11 +31,11 @@ async function getInstallationToken(): Promise<string | null> {
   if (!appId || !functionName || !nodeId) return null;
 
   try {
-    /* eslint-disable import/no-unresolved */
+    /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
     const { LambdaClient, InvokeCommand } = await import(
       '@aws-sdk/client-lambda'
     );
-    /* eslint-enable import/no-unresolved */
+    /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
     const event = {
       version: '2.0',
