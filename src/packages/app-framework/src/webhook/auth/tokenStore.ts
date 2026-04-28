@@ -4,6 +4,7 @@ import {
   PutItemCommand,
   DeleteItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import { encryptToken, decryptToken } from './tokenEncryption';
 
 const client = new DynamoDBClient({});
 
@@ -23,6 +24,12 @@ function getTableName(): string {
   return name;
 }
 
+function getKeyArn(): string {
+  const arn = process.env.TOKEN_ENCRYPTION_KEY_ARN;
+  if (!arn) throw new Error('TOKEN_ENCRYPTION_KEY_ARN not set');
+  return arn;
+}
+
 export async function getToken(gitHubUserId: number): Promise<UserToken | null> {
   const resp = await client.send(
     new GetItemCommand({
@@ -31,11 +38,12 @@ export async function getToken(gitHubUserId: number): Promise<UserToken | null> 
     }),
   );
   if (!resp.Item) return null;
+  const keyArn = getKeyArn();
   return {
     gitHubUserId: Number(resp.Item.GitHubUserId.N),
     login: resp.Item.Login.S!,
-    encryptedAccessToken: resp.Item.EncryptedAccessToken.S!,
-    encryptedRefreshToken: resp.Item.EncryptedRefreshToken.S!,
+    encryptedAccessToken: await decryptToken(resp.Item.EncryptedAccessToken.S!),
+    encryptedRefreshToken: await decryptToken(resp.Item.EncryptedRefreshToken.S!),
     tokenExpiry: resp.Item.TokenExpiry.S!,
     scopes: resp.Item.Scopes.S!,
     lastUsed: resp.Item.LastUsed.S!,
@@ -43,14 +51,17 @@ export async function getToken(gitHubUserId: number): Promise<UserToken | null> 
 }
 
 export async function putToken(token: UserToken): Promise<void> {
+  const keyArn = getKeyArn();
+  const encAccess = await encryptToken(token.encryptedAccessToken, keyArn);
+  const encRefresh = await encryptToken(token.encryptedRefreshToken, keyArn);
   await client.send(
     new PutItemCommand({
       TableName: getTableName(),
       Item: {
         GitHubUserId: { N: String(token.gitHubUserId) },
         Login: { S: token.login },
-        EncryptedAccessToken: { S: token.encryptedAccessToken },
-        EncryptedRefreshToken: { S: token.encryptedRefreshToken },
+        EncryptedAccessToken: { S: encAccess },
+        EncryptedRefreshToken: { S: encRefresh },
         TokenExpiry: { S: token.tokenExpiry },
         Scopes: { S: token.scopes },
         LastUsed: { S: token.lastUsed },

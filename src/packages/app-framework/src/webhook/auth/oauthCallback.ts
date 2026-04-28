@@ -11,6 +11,7 @@ export interface OAuthCallbackProps {
   readonly gitHubClientId: string;
   readonly oauthClientSecret: ISecret;
   readonly oauthClientSecretArn: string;
+  readonly tokenEncryptionKeyArn?: string;
 }
 
 export class OAuthCallback extends Construct {
@@ -29,6 +30,9 @@ export class OAuthCallback extends Construct {
         USER_TOKENS_TABLE_NAME: props.userTokensTable.tableName,
         GITHUB_CLIENT_ID: props.gitHubClientId,
         OAUTH_CLIENT_SECRET_ARN: props.oauthClientSecretArn,
+        ...(props.tokenEncryptionKeyArn && {
+          TOKEN_ENCRYPTION_KEY_ARN: props.tokenEncryptionKeyArn,
+        }),
       },
     });
 

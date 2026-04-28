@@ -11,6 +11,7 @@ import {
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import {
@@ -177,6 +178,11 @@ export class WebhookIngestion extends Construct {
         timeToLiveAttribute: 'TTL',
       });
 
+      const tokenEncryptionKey = new Key(this, 'TokenEncryptionKey', {
+        description: 'Encrypts OAuth tokens in UserTokens table',
+        enableKeyRotation: true,
+      });
+
       this.userTokensTable = new Table(this, 'UserTokensTable', {
         partitionKey: {
           name: 'GitHubUserId',
@@ -187,6 +193,7 @@ export class WebhookIngestion extends Construct {
         pointInTimeRecoverySpecification: {
           pointInTimeRecoveryEnabled: true,
         },
+        encryptionKey: tokenEncryptionKey,
       });
 
       const callbackUrl = `https://${api.restApiId}.execute-api.${Aws.REGION}.amazonaws.com/prod/auth/callback`;
@@ -203,7 +210,10 @@ export class WebhookIngestion extends Construct {
         gitHubClientId: props.gitHubClientId,
         oauthClientSecret,
         oauthClientSecretArn: props.oauthClientSecretArn,
+        tokenEncryptionKeyArn: tokenEncryptionKey.keyArn,
       });
+
+      tokenEncryptionKey.grantEncryptDecrypt(callback.lambdaHandler);
 
       const authResource = api.root.addResource('auth');
       authResource
@@ -233,9 +243,11 @@ export class WebhookIngestion extends Construct {
         nodeId: props.nodeId || '',
         installationTokenFunctionName: props.installationTokenFunctionName || '',
         installationTokenLambdaArn: props.installationTokenLambdaArn || '',
+        tokenEncryptionKeyArn: this.userTokensTable.encryptionKey?.keyArn,
       });
 
       this.userTokensTable.grantReadWriteData(comment.lambdaHandler);
+      this.userTokensTable.encryptionKey?.grantEncryptDecrypt(comment.lambdaHandler);
 
       new Rule(this, 'IssueCommentRule', {
         eventBus: this.eventBus,

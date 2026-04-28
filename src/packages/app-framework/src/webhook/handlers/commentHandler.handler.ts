@@ -1,5 +1,6 @@
 import { authorizeUser } from '../auth/authorizeUser';
 import { postComment } from '../orchestration/reportComment';
+import { getCommandHandler, getDefaultHandler, CommandContext } from './commands';
 
 const BOT_MENTION = '@ai3-mvp';
 
@@ -129,20 +130,27 @@ export const handler = async (event: CommentEvent): Promise<void> => {
   }
 
   const command = commentBody.replace(BOT_MENTION, '').trim();
-  await postComment({
+  const [cmdName, ...cmdArgs] = command.split(' ');
+
+  const ctx: CommandContext = {
+    args: cmdArgs.join(' '),
     token: authResult.userToken!.accessToken,
     owner,
     repo,
     issueNumber: detail.payload.issue.number,
-    body: `@${detail.sender.login} Received your command: \`${command}\`. Processing...`,
-  });
+    sender: detail.sender.login,
+  };
+
+  const handler = getCommandHandler(cmdName) || getDefaultHandler();
+  await handler(ctx);
 
   console.log(
     JSON.stringify({
       handler: 'commentHandler',
       deliveryId: detail.delivery_id,
       sender: detail.sender.login,
-      command,
+      command: cmdName,
+      args: cmdArgs.join(' '),
     }),
   );
 };

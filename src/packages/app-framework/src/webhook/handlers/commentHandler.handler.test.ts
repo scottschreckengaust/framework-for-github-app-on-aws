@@ -8,14 +8,36 @@ jest.mock('../orchestration/reportComment', () => ({
   postComment: (...args: unknown[]) => mockPostComment(...args),
 }));
 
+const mockLambdaSend = jest.fn();
+jest.mock(
+  '@aws-sdk/client-lambda',
+  () => ({
+    LambdaClient: jest.fn(() => ({ send: mockLambdaSend })),
+    InvokeCommand: jest.fn((params: unknown) => params),
+  }),
+  { virtual: true },
+);
+
 import { handler } from './commentHandler.handler';
 
 describe('commentHandler', () => {
   beforeEach(() => {
     mockAuthorizeUser.mockReset();
     mockPostComment.mockReset();
+    mockLambdaSend.mockReset();
     process.env.ORG_NAME = 'sbalswa';
     process.env.AUTH_LOGIN_URL = 'https://example.com/auth/login';
+    process.env.APP_ID = '12345';
+    process.env.INSTALLATION_TOKEN_FUNCTION_NAME = 'test-token-fn';
+    process.env.NODE_ID = 'MDEyOk9yZ2FuaXphdGlvbjE=';
+    mockLambdaSend.mockResolvedValue({
+      Payload: new TextEncoder().encode(
+        JSON.stringify({
+          statusCode: 200,
+          body: JSON.stringify({ installationToken: 'ghs_mock_install_token' }),
+        }),
+      ),
+    });
   });
 
   it('skips comments not mentioning the bot', async () => {
@@ -93,7 +115,7 @@ describe('commentHandler', () => {
     await handler(event as any);
     expect(mockPostComment).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.stringContaining('Received'),
+        body: expect.stringContaining('Available commands'),
       }),
     );
   });
