@@ -12,7 +12,7 @@
         <mxCell id="title-text" style="text;html=1;resizable=1;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=30;fontStyle=1;fontFamily=Helvetica;" value="ai3-mvp GitHub App Bot" vertex="1" parent="title-group">
           <mxGeometry height="42" width="800" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle-text" style="text;html=1;resizable=0;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=16;fontFamily=Helvetica;" value="Webhook ingestion, OAuth user authorization, and orchestration on AWS (sbalswa org, us-east-1)" vertex="1" parent="title-group">
+        <mxCell id="subtitle-text" style="text;html=1;resizable=0;points=[];autosize=1;align=left;verticalAlign=top;spacingTop=-4;fontSize=16;fontFamily=Helvetica;" value="Webhook ingestion, OAuth user authorization, and orchestration on AWS" vertex="1" parent="title-group">
           <mxGeometry height="25" width="800" x="5" y="40" as="geometry" />
         </mxCell>
         <mxCell id="title-separator" style="line;strokeWidth=2;html=1;fontSize=14;strokeColor=#FF9900;fontFamily=Helvetica;" value="" vertex="1" parent="title-group">
@@ -28,7 +28,7 @@
         </mxCell>
 
         <!-- AWS Cloud Boundary -->
-        <mxCell id="aws-cloud" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=14;fontStyle=1;fontColor=#232F3E;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#232F3E;fillColor=light-dark(#232F3E0D,#232F3E0D);verticalAlign=top;align=left;spacingLeft=30;spacingTop=5;dashed=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;fontFamily=Helvetica;fillStyle=auto;" value="AWS Cloud (361116840407, us-east-1)" vertex="1" parent="1">
+        <mxCell id="aws-cloud" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=14;fontStyle=1;fontColor=#232F3E;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#232F3E;fillColor=light-dark(#232F3E0D,#232F3E0D);verticalAlign=top;align=left;spacingLeft=30;spacingTop=5;dashed=0;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;fontFamily=Helvetica;fillStyle=auto;" value="AWS Cloud" vertex="1" parent="1">
           <mxGeometry x="240" y="140" width="1310" height="1020" as="geometry" />
         </mxCell>
 
