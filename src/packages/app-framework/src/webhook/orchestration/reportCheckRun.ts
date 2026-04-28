@@ -1,3 +1,5 @@
+import { fetchWithRetry } from '../utils/fetchWithRetry';
+
 export interface CreateCheckRunInput {
   token: string;
   owner: string;
@@ -20,7 +22,7 @@ export interface UpdateCheckRunInput {
 }
 
 export async function createCheckRun(input: CreateCheckRunInput): Promise<number> {
-  const resp = await fetch(
+  const resp = await fetchWithRetry(
     `https://api.github.com/repos/${input.owner}/${input.repo}/check-runs`,
     {
       method: 'POST',
@@ -46,7 +48,7 @@ export async function createCheckRun(input: CreateCheckRunInput): Promise<number
 }
 
 export async function updateCheckRun(input: UpdateCheckRunInput): Promise<void> {
-  const resp = await fetch(
+  const resp = await fetchWithRetry(
     `https://api.github.com/repos/${input.owner}/${input.repo}/check-runs/${input.checkRunId}`,
     {
       method: 'PATCH',
