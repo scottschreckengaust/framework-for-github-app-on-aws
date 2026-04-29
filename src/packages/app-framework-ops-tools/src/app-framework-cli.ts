@@ -62,4 +62,19 @@ program
       }
     },
   );
+// subcommand - redrive
+program
+  .command('redrive')
+  .description('Clear idempotency record to allow webhook event reprocessing')
+  .argument('<delivery-id>', 'GitHub webhook delivery ID (X-GitHub-Delivery header)')
+  .argument('<table-name>', 'DynamoDB idempotency table name')
+  .action(async (deliveryId: string, tableName: string) => {
+    try {
+      const { redrive } = await import('./redrive');
+      await redrive(deliveryId, tableName);
+    } catch (error) {
+      console.error('Error:', error);
+      process.exit(1);
+    }
+  });
 program.parse(process.argv);
