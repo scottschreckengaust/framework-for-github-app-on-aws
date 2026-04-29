@@ -1,3 +1,5 @@
+import { fetchWithRetry } from '../utils/fetchWithRetry';
+
 export interface CreateCheckRunInput {
   token: string;
   owner: string;
@@ -19,14 +21,17 @@ export interface UpdateCheckRunInput {
   output?: { title: string; summary: string };
 }
 
-export async function createCheckRun(input: CreateCheckRunInput): Promise<number> {
-  const resp = await fetch(
+export async function createCheckRun(
+  input: CreateCheckRunInput,
+): Promise<number> {
+  const resp = await fetchWithRetry(
     `https://api.github.com/repos/${input.owner}/${input.repo}/check-runs`,
     {
       method: 'POST',
+      // prettier-ignore
       headers: {
-        Authorization: `Bearer ${input.token}`,
-        Accept: 'application/vnd.github+json',
+        'Authorization': `Bearer ${input.token}`,
+        'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -45,14 +50,17 @@ export async function createCheckRun(input: CreateCheckRunInput): Promise<number
   return data.id;
 }
 
-export async function updateCheckRun(input: UpdateCheckRunInput): Promise<void> {
-  const resp = await fetch(
+export async function updateCheckRun(
+  input: UpdateCheckRunInput,
+): Promise<void> {
+  const resp = await fetchWithRetry(
     `https://api.github.com/repos/${input.owner}/${input.repo}/check-runs/${input.checkRunId}`,
     {
       method: 'PATCH',
+      // prettier-ignore
       headers: {
-        Authorization: `Bearer ${input.token}`,
-        Accept: 'application/vnd.github+json',
+        'Authorization': `Bearer ${input.token}`,
+        'Accept': 'application/vnd.github+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({

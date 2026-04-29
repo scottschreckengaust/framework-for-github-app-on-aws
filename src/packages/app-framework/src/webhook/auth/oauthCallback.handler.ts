@@ -62,21 +62,19 @@ export const handler = async (
 
   const clientSecret = await getClientSecret();
 
-  const tokenResp = await fetch(
-    'https://github.com/login/oauth/access_token',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-      }),
+  const tokenResp = await fetch('https://github.com/login/oauth/access_token', {
+    method: 'POST',
+    // prettier-ignore
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
-  );
+    body: JSON.stringify({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+    }),
+  });
 
   if (!tokenResp.ok) {
     return { statusCode: 502, body: 'Failed to exchange code for token' };

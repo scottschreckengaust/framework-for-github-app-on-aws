@@ -29,7 +29,9 @@ describe('oauthLogin handler', () => {
     };
     const result = await handler(event as any);
     expect(result.statusCode).toBe(302);
-    expect(result.headers?.Location).toContain('github.com/login/oauth/authorize');
+    expect(result.headers?.Location).toContain(
+      'github.com/login/oauth/authorize',
+    );
     expect(result.headers?.Location).toContain('client_id=test-client-id');
     expect(result.headers?.Location).toContain('state=');
     expect(mockSend).toHaveBeenCalledTimes(1);

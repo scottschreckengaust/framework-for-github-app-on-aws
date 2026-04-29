@@ -10,15 +10,16 @@ import {
   Metric,
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
+import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { AttributeType, Table, BillingMode } from 'aws-cdk-lib/aws-dynamodb';
 import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
+import { Key } from 'aws-cdk-lib/aws-kms';
 import {
   Bucket,
   BucketEncryption,
   BlockPublicAccess,
 } from 'aws-cdk-lib/aws-s3';
-import { SnsAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { EmailSubscription } from 'aws-cdk-lib/aws-sns-subscriptions';
@@ -177,6 +178,11 @@ export class WebhookIngestion extends Construct {
         timeToLiveAttribute: 'TTL',
       });
 
+      const tokenEncryptionKey = new Key(this, 'TokenEncryptionKey', {
+        description: 'Encrypts OAuth tokens in UserTokens table',
+        enableKeyRotation: true,
+      });
+
       this.userTokensTable = new Table(this, 'UserTokensTable', {
         partitionKey: {
           name: 'GitHubUserId',
@@ -187,6 +193,7 @@ export class WebhookIngestion extends Construct {
         pointInTimeRecoverySpecification: {
           pointInTimeRecoveryEnabled: true,
         },
+        encryptionKey: tokenEncryptionKey,
       });
 
       const callbackUrl = `https://${api.restApiId}.execute-api.${Aws.REGION}.amazonaws.com/prod/auth/callback`;
@@ -203,7 +210,10 @@ export class WebhookIngestion extends Construct {
         gitHubClientId: props.gitHubClientId,
         oauthClientSecret,
         oauthClientSecretArn: props.oauthClientSecretArn,
+        tokenEncryptionKeyArn: tokenEncryptionKey.keyArn,
       });
+
+      tokenEncryptionKey.grantEncryptDecrypt(callback.lambdaHandler);
 
       const authResource = api.root.addResource('auth');
       authResource
@@ -221,7 +231,11 @@ export class WebhookIngestion extends Construct {
 
     const stub = new StubHandler(this, 'StubHandler');
 
-    if (props.gitHubClientId && props.oauthClientSecretArn && this.userTokensTable) {
+    if (
+      props.gitHubClientId &&
+      props.oauthClientSecretArn &&
+      this.userTokensTable
+    ) {
       const authLoginUrl = `https://${api.restApiId}.execute-api.${Aws.REGION}.amazonaws.com/prod/auth/login`;
       const comment = new CommentHandler(this, 'CommentHandler', {
         userTokensTableName: this.userTokensTable.tableName,
@@ -231,11 +245,16 @@ export class WebhookIngestion extends Construct {
         gitHubClientId: props.gitHubClientId,
         appId: props.appId || '',
         nodeId: props.nodeId || '',
-        installationTokenFunctionName: props.installationTokenFunctionName || '',
+        installationTokenFunctionName:
+          props.installationTokenFunctionName || '',
         installationTokenLambdaArn: props.installationTokenLambdaArn || '',
+        tokenEncryptionKeyArn: this.userTokensTable.encryptionKey?.keyArn,
       });
 
       this.userTokensTable.grantReadWriteData(comment.lambdaHandler);
+      this.userTokensTable.encryptionKey?.grantEncryptDecrypt(
+        comment.lambdaHandler,
+      );
 
       new Rule(this, 'IssueCommentRule', {
         eventBus: this.eventBus,
@@ -243,9 +262,37 @@ export class WebhookIngestion extends Construct {
           source: ['github'],
           detailType: ['issue_comment'],
         },
-        targets: [new LambdaFunction(comment.lambdaHandler, {
-          deadLetterQueue: alert.dlq,
-        })],
+        targets: [
+          new LambdaFunction(comment.lambdaHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+
+      new Rule(this, 'CommitCommentRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['commit_comment'],
+        },
+        targets: [
+          new LambdaFunction(comment.lambdaHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+
+      new Rule(this, 'PRReviewCommentRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['pull_request_review_comment'],
+        },
+        targets: [
+          new LambdaFunction(comment.lambdaHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
       });
     }
 
@@ -256,9 +303,11 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
         detailType: ['pull_request'],
       },
-      targets: [new LambdaFunction(prHandler.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(prHandler.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     const pushHandler = new PushHandler(this, 'PushHandler');
@@ -268,9 +317,11 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
         detailType: ['push'],
       },
-      targets: [new LambdaFunction(pushHandler.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(pushHandler.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler');
@@ -280,9 +331,11 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
         detailType: ['check_run'],
       },
-      targets: [new LambdaFunction(checkRunHandler.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(checkRunHandler.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler');
@@ -292,9 +345,11 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
         detailType: ['deployment'],
       },
-      targets: [new LambdaFunction(deploymentHandler.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(deploymentHandler.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler');
@@ -304,9 +359,11 @@ export class WebhookIngestion extends Construct {
         source: ['github'],
         detailType: ['discussion'],
       },
-      targets: [new LambdaFunction(discussionHandler.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(discussionHandler.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     new Rule(this, 'AllEventsRule', {
@@ -314,9 +371,11 @@ export class WebhookIngestion extends Construct {
       eventPattern: {
         source: ['github'],
       },
-      targets: [new LambdaFunction(stub.lambdaHandler, {
-        deadLetterQueue: alert.dlq,
-      })],
+      targets: [
+        new LambdaFunction(stub.lambdaHandler, {
+          deadLetterQueue: alert.dlq,
+        }),
+      ],
     });
 
     const oversizedAlarm = new Alarm(this, 'OversizedPayloadAlarm', {
@@ -342,9 +401,7 @@ export class WebhookIngestion extends Construct {
       const alertTopic = new Topic(this, 'AlertTopic', {
         topicName: 'ai3-mvp-webhook-alerts',
       });
-      alertTopic.addSubscription(
-        new EmailSubscription(props.alertEmail),
-      );
+      alertTopic.addSubscription(new EmailSubscription(props.alertEmail));
       oversizedAlarm.addAlarmAction(new SnsAction(alertTopic));
     }
 

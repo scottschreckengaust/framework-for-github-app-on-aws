@@ -1,7 +1,7 @@
 // prettier-ignore
 interface EventDetail {
   'detail-type': string;
-  detail: {
+  'detail': {
     delivery_id: string;
     action?: string;
     sender?: { login: string };
@@ -20,9 +20,7 @@ export const handler = async (event: EventDetail): Promise<void> => {
       sender: event.detail.sender?.login,
       repo: event.detail.repository?.full_name,
       discussionTitle: (
-        event.detail.payload.discussion as
-          | { title: string }
-          | undefined
+        event.detail.payload.discussion as { title: string } | undefined
       )?.title,
     }),
   );

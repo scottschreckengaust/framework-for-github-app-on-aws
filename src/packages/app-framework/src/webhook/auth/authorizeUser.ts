@@ -3,6 +3,7 @@ import {
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
 import { getToken, putToken } from './tokenStore';
+import { fetchWithRetry } from '../utils/fetchWithRetry';
 
 export interface AuthorizeInput {
   senderLogin: string;
@@ -48,19 +49,23 @@ async function refreshAccessToken(
   refresh_token: string;
   expires_in: number;
 } | null> {
-  const resp = await fetch('https://github.com/login/oauth/access_token', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
+  const resp = await fetchWithRetry(
+    'https://github.com/login/oauth/access_token',
+    {
+      method: 'POST',
+      // prettier-ignore
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken,
-    }),
-  });
+  );
   if (!resp.ok) return null;
   const data = (await resp.json()) as Record<string, unknown>;
   if (data.error) return null;
@@ -74,7 +79,7 @@ async function refreshAccessToken(
 export async function authorizeUser(
   input: AuthorizeInput,
 ): Promise<AuthResult> {
-  const orgCheckResp = await fetch(
+  const orgCheckResp = await fetchWithRetry(
     `https://api.github.com/orgs/${input.orgName}/members/${input.senderLogin}`,
     {
       headers: {
@@ -90,7 +95,7 @@ export async function authorizeUser(
     };
   }
 
-  const permResp = await fetch(
+  const permResp = await fetchWithRetry(
     `https://api.github.com/repos/${input.repoFullName}/collaborators/${input.senderLogin}/permission`,
     {
       headers: {

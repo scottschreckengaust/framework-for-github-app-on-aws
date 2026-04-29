@@ -18,7 +18,8 @@ export class OAuthLogin extends Construct {
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
-      description: 'Generates OAuth state and redirects to GitHub authorization',
+      description:
+        'Generates OAuth state and redirects to GitHub authorization',
       memorySize: 256,
       timeout: Duration.seconds(10),
       environment: {
