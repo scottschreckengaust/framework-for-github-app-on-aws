@@ -133,7 +133,9 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     return;
   }
 
-  const command = commentBody.slice(commentBody.indexOf(trigger) + trigger.length).trim();
+  const command = commentBody
+    .slice(commentBody.indexOf(trigger) + trigger.length)
+    .trim();
   const [cmdName, ...cmdArgs] = command.split(' ');
 
   const ctx: CommandContext = {
