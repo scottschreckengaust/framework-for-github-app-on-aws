@@ -6,7 +6,10 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import {
   Alarm,
+  AlarmWidget,
   ComparisonOperator,
+  Dashboard,
+  GraphWidget,
   Metric,
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
@@ -403,13 +406,79 @@ export class WebhookIngestion extends Construct {
       treatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
+    const dlqAlarm = new Alarm(this, 'DLQDepthAlarm', {
+      alarmName: 'ai3-mvp-dlq-not-empty',
+      alarmDescription:
+        'DLQ has messages - handler failures detected',
+      metric: alert.dlq.metricApproximateNumberOfMessagesVisible({
+        period: Duration.minutes(5),
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
     if (props.alertEmail) {
       const alertTopic = new Topic(this, 'AlertTopic', {
         topicName: 'ai3-mvp-webhook-alerts',
       });
       alertTopic.addSubscription(new EmailSubscription(props.alertEmail));
       oversizedAlarm.addAlarmAction(new SnsAction(alertTopic));
+      dlqAlarm.addAlarmAction(new SnsAction(alertTopic));
     }
+
+    const dashboard = new Dashboard(this, 'OperationsDashboard', {
+      dashboardName: 'ai3-mvp-platform',
+    });
+
+    dashboard.addWidgets(
+      new GraphWidget({
+        title: 'Webhook Ingestion Rate',
+        left: [receiver.lambdaHandler.metricInvocations({ period: Duration.minutes(5) })],
+        width: 8,
+        height: 6,
+      }),
+      new GraphWidget({
+        title: 'Handler Errors',
+        left: [
+          receiver.lambdaHandler.metricErrors({ period: Duration.minutes(5), label: 'Receiver' }),
+          stub.lambdaHandler.metricErrors({ period: Duration.minutes(5), label: 'Stub' }),
+        ],
+        width: 8,
+        height: 6,
+      }),
+      new GraphWidget({
+        title: 'DLQ Depth',
+        left: [alert.dlq.metricApproximateNumberOfMessagesVisible({ period: Duration.minutes(5) })],
+        width: 8,
+        height: 6,
+      }),
+    );
+
+    dashboard.addWidgets(
+      new GraphWidget({
+        title: 'API Gateway 4XX / 5XX',
+        left: [
+          new Metric({ namespace: 'AWS/ApiGateway', metricName: '4XXError', dimensionsMap: { ApiName: 'ai3-mvp-webhook' }, period: Duration.minutes(5), statistic: 'Sum', label: '4XX' }),
+          new Metric({ namespace: 'AWS/ApiGateway', metricName: '5XXError', dimensionsMap: { ApiName: 'ai3-mvp-webhook' }, period: Duration.minutes(5), statistic: 'Sum', label: '5XX' }),
+        ],
+        width: 8,
+        height: 6,
+      }),
+      new AlarmWidget({
+        title: 'Alarm: Oversized Payload',
+        alarm: oversizedAlarm,
+        width: 8,
+        height: 6,
+      }),
+      new AlarmWidget({
+        title: 'Alarm: DLQ Not Empty',
+        alarm: dlqAlarm,
+        width: 8,
+        height: 6,
+      }),
+    );
 
     Tags.of(this).add('ai3-mvp', 'WebhookIngestion');
   }

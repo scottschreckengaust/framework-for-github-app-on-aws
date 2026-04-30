@@ -103,60 +103,76 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     return;
   }
 
-  const authResult = await authorizeUser({
-    senderLogin: detail.sender.login,
-    senderId: detail.sender.id,
-    repoFullName: detail.repository.full_name,
-    installationToken,
-    orgName,
-  });
+  try {
+    const authResult = await authorizeUser({
+      senderLogin: detail.sender.login,
+      senderId: detail.sender.id,
+      repoFullName: detail.repository.full_name,
+      installationToken,
+      orgName,
+    });
 
-  if (!authResult.authorized) {
-    if (authResult.needsAuth) {
-      const authUrl = process.env.AUTH_LOGIN_URL || '';
-      await postComment({
-        token: installationToken,
-        owner,
-        repo,
-        issueNumber: detail.payload.issue.number,
-        body: `@${detail.sender.login} I need you to [authorize this app](${authUrl}?repo=${detail.repository.full_name}&issue=${detail.payload.issue.number}) before I can act on your behalf.`,
-      });
-    } else {
-      await postComment({
-        token: installationToken,
-        owner,
-        repo,
-        issueNumber: detail.payload.issue.number,
-        body: `@${detail.sender.login} ${authResult.reason}`,
-      });
+    if (!authResult.authorized) {
+      if (authResult.needsAuth) {
+        const authUrl = process.env.AUTH_LOGIN_URL || '';
+        await postComment({
+          token: installationToken,
+          owner,
+          repo,
+          issueNumber: detail.payload.issue.number,
+          body: `@${detail.sender.login} I need you to [authorize this app](${authUrl}?repo=${detail.repository.full_name}&issue=${detail.payload.issue.number}) before I can act on your behalf.`,
+        });
+      } else {
+        await postComment({
+          token: installationToken,
+          owner,
+          repo,
+          issueNumber: detail.payload.issue.number,
+          body: `@${detail.sender.login} ${authResult.reason}`,
+        });
+      }
+      return;
     }
-    return;
-  }
 
-  const command = commentBody
-    .slice(commentBody.indexOf(trigger) + trigger.length)
-    .trim();
-  const [cmdName, ...cmdArgs] = command.split(' ');
+    const command = commentBody
+      .slice(commentBody.indexOf(trigger) + trigger.length)
+      .trim();
+    const [cmdName, ...cmdArgs] = command.split(' ');
 
-  const ctx: CommandContext = {
-    args: cmdArgs.join(' '),
-    token: authResult.userToken!.accessToken,
-    owner,
-    repo,
-    issueNumber: detail.payload.issue.number,
-    sender: detail.sender.login,
-  };
-
-  const commandHandler = getCommandHandler(cmdName) || getDefaultHandler();
-  await commandHandler(ctx);
-
-  console.log(
-    JSON.stringify({
-      handler: 'commentHandler',
-      deliveryId: detail.delivery_id,
-      sender: detail.sender.login,
-      command: cmdName,
+    const ctx: CommandContext = {
       args: cmdArgs.join(' '),
-    }),
-  );
+      token: authResult.userToken!.accessToken,
+      owner,
+      repo,
+      issueNumber: detail.payload.issue.number,
+      sender: detail.sender.login,
+    };
+
+    const commandHandler = getCommandHandler(cmdName) || getDefaultHandler();
+    await commandHandler(ctx);
+
+    console.log(
+      JSON.stringify({
+        handler: 'commentHandler',
+        deliveryId: detail.delivery_id,
+        sender: detail.sender.login,
+        command: cmdName,
+        args: cmdArgs.join(' '),
+      }),
+    );
+  } catch (error) {
+    console.error('Handler error', { deliveryId: detail.delivery_id, error });
+    try {
+      await postComment({
+        token: installationToken,
+        owner,
+        repo,
+        issueNumber: detail.payload.issue.number,
+        body: `@${detail.sender.login} Sorry, I encountered an error processing your request. The team has been notified.`,
+      });
+    } catch (replyError) {
+      console.error('Failed to post error reply', replyError);
+    }
+    throw error;
+  }
 };
