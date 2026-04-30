@@ -403,12 +403,26 @@ export class WebhookIngestion extends Construct {
       treatMissingData: TreatMissingData.NOT_BREACHING,
     });
 
+    const dlqAlarm = new Alarm(this, 'DLQDepthAlarm', {
+      alarmName: 'ai3-mvp-dlq-not-empty',
+      alarmDescription:
+        'DLQ has messages - handler failures detected',
+      metric: alert.dlq.metricApproximateNumberOfMessagesVisible({
+        period: Duration.minutes(5),
+      }),
+      threshold: 1,
+      evaluationPeriods: 1,
+      comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+    });
+
     if (props.alertEmail) {
       const alertTopic = new Topic(this, 'AlertTopic', {
         topicName: 'ai3-mvp-webhook-alerts',
       });
       alertTopic.addSubscription(new EmailSubscription(props.alertEmail));
       oversizedAlarm.addAlarmAction(new SnsAction(alertTopic));
+      dlqAlarm.addAlarmAction(new SnsAction(alertTopic));
     }
 
     Tags.of(this).add('ai3-mvp', 'WebhookIngestion');
