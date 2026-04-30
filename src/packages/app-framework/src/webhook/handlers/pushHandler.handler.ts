@@ -14,7 +14,7 @@ interface EventDetail {
 
 export const handler = async (event: EventDetail): Promise<void> => {
   publishEventProcessed({
-    appId: (event.detail as any).installation?.app_id,
+    appId: (event.detail as any).installation?.id,
     orgName: (event.detail as any).organization?.login,
     eventType: event['detail-type'],
     handlerName: 'pushHandler',

@@ -97,7 +97,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
   const orgName = process.env.ORG_NAME || owner;
 
   const metricCtx: EventMetricContext = {
-    appId: detail.installation?.app_id,
+    appId: process.env.APP_ID || detail.installation?.id,
     orgName: detail.organization?.login || owner,
     eventType: event['detail-type'],
     handlerName: 'commentHandler',
