@@ -437,7 +437,7 @@ export class WebhookIngestion extends Construct {
       new GraphWidget({
         title: 'Events Processed by Handler',
         left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,OrgName,EventType,HandlerName,service} MetricName=\"EventProcessed\"', 'Sum')",
+          expression: "SEARCH('{GitHubAppPlatform,AppId,EventType,HandlerName,OrgName,service} MetricName=\"EventProcessed\"', 'Sum')",
           period: Duration.minutes(5),
         })],
         width: 8,
@@ -446,7 +446,7 @@ export class WebhookIngestion extends Construct {
       new GraphWidget({
         title: 'Commands Executed',
         left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,OrgName,HandlerName,Command,service} MetricName=\"CommandExecuted\"', 'Sum')",
+          expression: "SEARCH('{GitHubAppPlatform,AppId,Command,HandlerName,OrgName,service} MetricName=\"CommandExecuted\"', 'Sum')",
           period: Duration.minutes(5),
         })],
         width: 8,
@@ -456,12 +456,12 @@ export class WebhookIngestion extends Construct {
         title: 'Auth Results',
         left: [
           new MathExpression({
-            expression: "SEARCH('{GitHubAppPlatform,AppId,OrgName,HandlerName,service} MetricName=\"AuthSuccess\"', 'Sum')",
+            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthSuccess\"', 'Sum')",
             period: Duration.minutes(5),
             label: 'Success',
           }),
           new MathExpression({
-            expression: "SEARCH('{GitHubAppPlatform,AppId,OrgName,HandlerName,service} MetricName=\"AuthFailed\"', 'Sum')",
+            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthFailed\"', 'Sum')",
             period: Duration.minutes(5),
             label: 'Failed',
           }),
@@ -475,7 +475,7 @@ export class WebhookIngestion extends Construct {
       new GraphWidget({
         title: 'Errors by Handler',
         left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,OrgName,HandlerName,service} MetricName=\"ErrorOccurred\"', 'Sum')",
+          expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"ErrorOccurred\"', 'Sum')",
           period: Duration.minutes(5),
         })],
         width: 8,
