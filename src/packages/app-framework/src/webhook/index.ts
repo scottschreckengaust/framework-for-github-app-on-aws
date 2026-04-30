@@ -438,6 +438,7 @@ export class WebhookIngestion extends Construct {
         title: 'Events Processed by Handler',
         left: [new MathExpression({
           expression: "SEARCH('{GitHubAppPlatform,AppId,EventType,HandlerName,OrgName,service} MetricName=\"EventProcessed\"', 'Sum', 300)",
+          label: '',
         })],
         width: 8,
         height: 6,
@@ -446,6 +447,7 @@ export class WebhookIngestion extends Construct {
         title: 'Commands Executed',
         left: [new MathExpression({
           expression: "SEARCH('{GitHubAppPlatform,AppId,Command,HandlerName,OrgName,service} MetricName=\"CommandExecuted\"', 'Sum', 300)",
+          label: '',
         })],
         width: 8,
         height: 6,
@@ -455,11 +457,11 @@ export class WebhookIngestion extends Construct {
         left: [
           new MathExpression({
             expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthSuccess\"', 'Sum', 300)",
-            label: 'Success',
+            label: 'Auth Success',
           }),
           new MathExpression({
             expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthFailed\"', 'Sum', 300)",
-            label: 'Failed',
+            label: 'Auth Failed',
           }),
         ],
         width: 8,
@@ -472,6 +474,7 @@ export class WebhookIngestion extends Construct {
         title: 'Errors by Handler',
         left: [new MathExpression({
           expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"ErrorOccurred\"', 'Sum', 300)",
+          label: '',
         })],
         width: 8,
         height: 6,
