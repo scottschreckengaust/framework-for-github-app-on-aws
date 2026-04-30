@@ -1,3 +1,5 @@
+import { publishEventProcessed } from '../utils/metrics';
+
 // prettier-ignore
 interface EventDetail {
   'detail-type': string;
@@ -11,6 +13,12 @@ interface EventDetail {
 }
 
 export const handler = async (event: EventDetail): Promise<void> => {
+  publishEventProcessed({
+    appId: (event.detail as any).installation?.id,
+    orgName: (event.detail as any).organization?.login,
+    eventType: event['detail-type'],
+    handlerName: 'discussionHandler',
+  });
   console.log(
     JSON.stringify({
       handler: 'discussionHandler',

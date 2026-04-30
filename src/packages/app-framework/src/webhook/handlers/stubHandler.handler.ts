@@ -1,3 +1,5 @@
+import { publishEventProcessed } from '../utils/metrics';
+
 // prettier-ignore
 interface GitHubEventBridgeEvent {
   'source': string;
@@ -14,6 +16,12 @@ interface GitHubEventBridgeEvent {
 export const handler = async (
   event: GitHubEventBridgeEvent,
 ): Promise<{ received: boolean }> => {
+  publishEventProcessed({
+    appId: (event.detail as any).installation?.id,
+    orgName: (event.detail as any).organization?.login,
+    eventType: event['detail-type'],
+    handlerName: 'stubHandler',
+  });
   console.log(
     JSON.stringify({
       eventType: event['detail-type'],

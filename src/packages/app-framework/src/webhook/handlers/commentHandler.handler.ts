@@ -5,6 +5,7 @@ import {
 } from './commands';
 import { authorizeUser } from '../auth/authorizeUser';
 import { postComment } from '../orchestration/reportComment';
+import { publishEventProcessed, publishCommandExecuted, publishAuthResult, publishError, EventMetricContext } from '../utils/metrics';
 
 const BOT_TRIGGERS = ['@ai3-mvp', '/ai3-mvp'];
 
@@ -16,7 +17,8 @@ interface CommentEvent {
     action: string;
     sender: { login: string; id: number };
     repository: { full_name: string };
-    installation?: { id: number };
+    installation?: { id: number; app_id: number };
+    organization?: { login: string };
     payload: {
       comment: { body: string };
       issue: { number: number };
@@ -94,6 +96,14 @@ export const handler = async (event: CommentEvent): Promise<void> => {
   const [owner, repo] = detail.repository.full_name.split('/');
   const orgName = process.env.ORG_NAME || owner;
 
+  const metricCtx: EventMetricContext = {
+    appId: process.env.APP_ID || detail.installation?.id,
+    orgName: detail.organization?.login || owner,
+    eventType: event['detail-type'],
+    handlerName: 'commentHandler',
+  };
+  publishEventProcessed(metricCtx);
+
   const installationToken = await getInstallationToken();
 
   if (!installationToken) {
@@ -113,6 +123,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     });
 
     if (!authResult.authorized) {
+      publishAuthResult(metricCtx, false);
       if (authResult.needsAuth) {
         const authUrl = process.env.AUTH_LOGIN_URL || '';
         await postComment({
@@ -134,6 +145,8 @@ export const handler = async (event: CommentEvent): Promise<void> => {
       return;
     }
 
+    publishAuthResult(metricCtx, true);
+
     const command = commentBody
       .slice(commentBody.indexOf(trigger) + trigger.length)
       .trim();
@@ -150,6 +163,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
 
     const commandHandler = getCommandHandler(cmdName) || getDefaultHandler();
     await commandHandler(ctx);
+    publishCommandExecuted(metricCtx, cmdName);
 
     console.log(
       JSON.stringify({
@@ -161,6 +175,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
       }),
     );
   } catch (error) {
+    publishError(metricCtx);
     console.error('Handler error', { deliveryId: detail.delivery_id, error });
     try {
       await postComment({

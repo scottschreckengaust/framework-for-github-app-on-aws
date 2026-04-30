@@ -10,6 +10,7 @@ import {
   ComparisonOperator,
   Dashboard,
   GraphWidget,
+  MathExpression,
   Metric,
   TreatMissingData,
 } from 'aws-cdk-lib/aws-cloudwatch';
@@ -434,17 +435,47 @@ export class WebhookIngestion extends Construct {
 
     dashboard.addWidgets(
       new GraphWidget({
-        title: 'Webhook Ingestion Rate',
-        left: [receiver.lambdaHandler.metricInvocations({ period: Duration.minutes(5) })],
+        title: 'Events Processed by Handler',
+        left: [new MathExpression({
+          expression: "SEARCH('{GitHubAppPlatform,AppId,EventType,HandlerName,OrgName,service} MetricName=\"EventProcessed\"', 'Sum', 300)",
+          label: '',
+        })],
         width: 8,
         height: 6,
       }),
       new GraphWidget({
-        title: 'Handler Errors',
+        title: 'Commands Executed',
+        left: [new MathExpression({
+          expression: "SEARCH('{GitHubAppPlatform,AppId,Command,HandlerName,OrgName,service} MetricName=\"CommandExecuted\"', 'Sum', 300)",
+          label: '',
+        })],
+        width: 8,
+        height: 6,
+      }),
+      new GraphWidget({
+        title: 'Auth Results',
         left: [
-          receiver.lambdaHandler.metricErrors({ period: Duration.minutes(5), label: 'Receiver' }),
-          stub.lambdaHandler.metricErrors({ period: Duration.minutes(5), label: 'Stub' }),
+          new MathExpression({
+            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthSuccess\"', 'Sum', 300)",
+            label: 'Auth Success',
+          }),
+          new MathExpression({
+            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthFailed\"', 'Sum', 300)",
+            label: 'Auth Failed',
+          }),
         ],
+        width: 8,
+        height: 6,
+      }),
+    );
+
+    dashboard.addWidgets(
+      new GraphWidget({
+        title: 'Errors by Handler',
+        left: [new MathExpression({
+          expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"ErrorOccurred\"', 'Sum', 300)",
+          label: '',
+        })],
         width: 8,
         height: 6,
       }),
@@ -454,9 +485,6 @@ export class WebhookIngestion extends Construct {
         width: 8,
         height: 6,
       }),
-    );
-
-    dashboard.addWidgets(
       new GraphWidget({
         title: 'API Gateway 4XX / 5XX',
         left: [
@@ -466,16 +494,19 @@ export class WebhookIngestion extends Construct {
         width: 8,
         height: 6,
       }),
+    );
+
+    dashboard.addWidgets(
       new AlarmWidget({
         title: 'Alarm: Oversized Payload',
         alarm: oversizedAlarm,
-        width: 8,
+        width: 12,
         height: 6,
       }),
       new AlarmWidget({
         title: 'Alarm: DLQ Not Empty',
         alarm: dlqAlarm,
-        width: 8,
+        width: 12,
         height: 6,
       }),
     );
