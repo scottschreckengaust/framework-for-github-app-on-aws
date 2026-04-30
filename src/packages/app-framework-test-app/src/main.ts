@@ -47,9 +47,7 @@ export class TheAppFrameworkTestStack extends Stack {
       'webhookSecretArn',
     ) as string;
     const alertEmail = this.node.tryGetContext('alertEmail') as string;
-    const gitHubClientId = this.node.tryGetContext(
-      'gitHubClientId',
-    ) as string;
+    const gitHubClientId = this.node.tryGetContext('gitHubClientId') as string;
     const oauthClientSecretArn = this.node.tryGetContext(
       'oauthClientSecretArn',
     ) as string;

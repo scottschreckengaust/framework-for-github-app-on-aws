@@ -6,7 +6,7 @@ import {
 import { authorizeUser } from '../auth/authorizeUser';
 import { postComment } from '../orchestration/reportComment';
 
-const BOT_MENTION = '@ai3-mvp';
+const BOT_TRIGGERS = ['@ai3-mvp', '/ai3-mvp'];
 
 // prettier-ignore
 interface CommentEvent {
@@ -82,7 +82,8 @@ export const handler = async (event: CommentEvent): Promise<void> => {
   const { detail } = event;
   const commentBody = detail.payload.comment.body;
 
-  if (!commentBody.includes(BOT_MENTION)) {
+  const trigger = BOT_TRIGGERS.find((t) => commentBody.includes(t));
+  if (!trigger) {
     return;
   }
 
@@ -132,7 +133,9 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     return;
   }
 
-  const command = commentBody.replace(BOT_MENTION, '').trim();
+  const command = commentBody
+    .slice(commentBody.indexOf(trigger) + trigger.length)
+    .trim();
   const [cmdName, ...cmdArgs] = command.split(' ');
 
   const ctx: CommandContext = {

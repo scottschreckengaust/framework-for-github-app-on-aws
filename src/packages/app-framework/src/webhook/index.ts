@@ -255,6 +255,12 @@ export class WebhookIngestion extends Construct {
       this.userTokensTable.encryptionKey?.grantEncryptDecrypt(
         comment.lambdaHandler,
       );
+      const oauthSecret = Secret.fromSecretCompleteArn(
+        this,
+        'OAuthSecretForComment',
+        props.oauthClientSecretArn,
+      );
+      oauthSecret.grantRead(comment.lambdaHandler);
 
       new Rule(this, 'IssueCommentRule', {
         eventBus: this.eventBus,
