@@ -63,6 +63,7 @@ export class TheAppFrameworkTestStack extends Stack {
           credentialManager.installationAccessLambdaArn,
         installationTokenLambdaArn:
           credentialManager.installationAccessLambdaArn,
+        appTokenLambdaArn: credentialManager.appTokenLambdaArn,
       });
       new CfnOutput(this, 'WebhookEndpoint', {
         value: webhook.apiEndpoint,

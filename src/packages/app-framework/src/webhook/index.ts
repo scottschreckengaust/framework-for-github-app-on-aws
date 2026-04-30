@@ -39,6 +39,7 @@ import { DiscussionHandler } from './handlers/discussionHandler';
 import { PRHandler } from './handlers/prHandler';
 import { PushHandler } from './handlers/pushHandler';
 import { StubHandler } from './handlers/stubHandler';
+import { HealthCheck } from './healthCheck';
 import { JobsTable } from './orchestration/jobsTable';
 import { WebhookReceiver } from './receiver/webhookReceiver';
 
@@ -51,6 +52,7 @@ export interface WebhookIngestionProps {
   readonly nodeId?: string;
   readonly installationTokenFunctionName?: string;
   readonly installationTokenLambdaArn?: string;
+  readonly appTokenLambdaArn?: string;
 }
 
 export class WebhookIngestion extends Construct {
@@ -510,6 +512,26 @@ export class WebhookIngestion extends Construct {
         height: 6,
       }),
     );
+
+    dashboard.addWidgets(
+      new GraphWidget({
+        title: 'Health Check',
+        left: [new MathExpression({
+          expression: "SEARCH('{GitHubAppPlatform,AppId,CheckType,service} MetricName=\"HealthCheckSuccess\"', 'Average', 300)",
+          label: '',
+        })],
+        width: 8,
+        height: 6,
+      }),
+    );
+
+    if (props.appId && props.appTokenLambdaArn) {
+      new HealthCheck(this, 'HealthCheck', {
+        appId: props.appId,
+        appTokenFunctionName: props.appTokenLambdaArn,
+        appTokenLambdaArn: props.appTokenLambdaArn,
+      });
+    }
 
     Tags.of(this).add('ai3-mvp', 'WebhookIngestion');
   }
