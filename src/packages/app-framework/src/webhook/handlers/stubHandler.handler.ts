@@ -1,3 +1,4 @@
+import { isAlreadyProcessed } from '../utils/idempotency';
 import { publishEventProcessed } from '../utils/metrics';
 
 // prettier-ignore
@@ -16,6 +17,9 @@ interface GitHubEventBridgeEvent {
 export const handler = async (
   event: GitHubEventBridgeEvent,
 ): Promise<{ received: boolean }> => {
+  const isDuplicate = await isAlreadyProcessed(event.detail.delivery_id, 'stubHandler');
+  if (isDuplicate) return { received: false };
+
   publishEventProcessed({
     appId: (event.detail as any).installation?.id,
     orgName: (event.detail as any).organization?.login,

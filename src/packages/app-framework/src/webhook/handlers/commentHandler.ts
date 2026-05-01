@@ -15,6 +15,7 @@ export interface CommentHandlerProps {
   readonly installationTokenFunctionName: string;
   readonly installationTokenLambdaArn: string;
   readonly tokenEncryptionKeyArn?: string;
+  readonly jobsTableName?: string;
 }
 
 export class CommentHandler extends Construct {
@@ -37,6 +38,7 @@ export class CommentHandler extends Construct {
         APP_ID: props.appId,
         NODE_ID: props.nodeId,
         INSTALLATION_TOKEN_FUNCTION_NAME: props.installationTokenFunctionName,
+        JOBS_TABLE_NAME: props.jobsTableName || '',
         ...(props.tokenEncryptionKeyArn && {
           TOKEN_ENCRYPTION_KEY_ARN: props.tokenEncryptionKeyArn,
         }),
