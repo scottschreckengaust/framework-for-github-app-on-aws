@@ -42,6 +42,8 @@ import { StubHandler } from './handlers/stubHandler';
 import { HealthCheck } from './healthCheck';
 import { JobsTable } from './orchestration/jobsTable';
 import { WebhookReceiver } from './receiver/webhookReceiver';
+import { CheckRunStep } from './workflows/checkRunStep';
+import { CICheckWorkflow } from './workflows/ciCheckWorkflow';
 
 export interface WebhookIngestionProps {
   readonly webhookSecretArn: string;
@@ -233,6 +235,11 @@ export class WebhookIngestion extends Construct {
     const jobs = new JobsTable(this, 'Jobs');
     this.jobsTable = jobs.table;
 
+    const checkRunStep = new CheckRunStep(this, 'CheckRunStep');
+    const ciCheckWorkflow = new CICheckWorkflow(this, 'CICheckWorkflow', {
+      checkRunStepFunction: checkRunStep.lambdaHandler,
+    });
+
     const alert = new AlertHandler(this, 'Alert');
 
     const stub = new StubHandler(this, 'StubHandler', { jobsTableName: this.jobsTable?.tableName });
@@ -257,10 +264,12 @@ export class WebhookIngestion extends Construct {
         installationTokenLambdaArn: props.installationTokenLambdaArn || '',
         tokenEncryptionKeyArn: this.userTokensTable.encryptionKey?.keyArn,
         jobsTableName: this.jobsTable?.tableName || '',
+        ciCheckStateMachineArn: ciCheckWorkflow.stateMachine.stateMachineArn,
       });
 
       this.userTokensTable.grantReadWriteData(comment.lambdaHandler);
       this.jobsTable?.grantReadWriteData(comment.lambdaHandler);
+      ciCheckWorkflow.stateMachine.grantStartExecution(comment.lambdaHandler);
       this.userTokensTable.encryptionKey?.grantEncryptDecrypt(
         comment.lambdaHandler,
       );
