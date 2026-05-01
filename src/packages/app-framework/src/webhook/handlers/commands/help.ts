@@ -4,6 +4,7 @@ import { postComment } from '../../orchestration/reportComment';
 const AVAILABLE_COMMANDS = [
   '`help` - List available commands',
   '`echo <text>` - Echo back text',
+  '`check [sha]` - Run CI check (creates GitHub Check Run)',
   '`status` - Show running jobs (coming soon)',
   '`deploy <env>` - Deploy to environment (coming soon)',
 ];

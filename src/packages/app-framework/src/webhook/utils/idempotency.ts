@@ -21,7 +21,7 @@ export async function isAlreadyProcessed(
       new PutItemCommand({
         TableName: tableName,
         Item: {
-          JobId: { S: `delivery:${deliveryId}` },
+          JobId: { S: `delivery:${handlerName}:${deliveryId}` },
           DeliveryId: { S: deliveryId },
           HandlerName: { S: handlerName },
           ProcessedAt: { S: new Date().toISOString() },
