@@ -1,7 +1,9 @@
-import { Duration } from 'aws-cdk-lib';
+import { Duration, RemovalPolicy } from 'aws-cdk-lib';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
+import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
   DefinitionBody,
+  LogLevel,
   StateMachine,
   StateMachineType,
   Wait,
@@ -65,10 +67,20 @@ export class CICheckWorkflow extends Construct {
       .next(simulateCI)
       .next(completeCheckRun);
 
+    const logGroup = new LogGroup(this, 'ExecutionLogs', {
+      retention: RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
     this.stateMachine = new StateMachine(this, 'StateMachine', {
       definitionBody: DefinitionBody.fromChainable(definition),
       stateMachineType: StateMachineType.EXPRESS,
       timeout: Duration.minutes(5),
+      logs: {
+        destination: logGroup,
+        level: LogLevel.ALL,
+        includeExecutionData: true,
+      },
     });
   }
 }

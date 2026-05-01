@@ -540,6 +540,16 @@ export class WebhookIngestion extends Construct {
         width: 8,
         height: 6,
       }),
+      new GraphWidget({
+        title: 'Step Functions Executions',
+        left: [
+          ciCheckWorkflow.stateMachine.metricStarted({ period: Duration.minutes(5), label: 'Started' }),
+          ciCheckWorkflow.stateMachine.metricSucceeded({ period: Duration.minutes(5), label: 'Succeeded' }),
+          ciCheckWorkflow.stateMachine.metricFailed({ period: Duration.minutes(5), label: 'Failed' }),
+        ],
+        width: 8,
+        height: 6,
+      }),
     );
 
     if (props.appId && props.appTokenLambdaArn) {
