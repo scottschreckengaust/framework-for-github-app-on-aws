@@ -3,10 +3,14 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../lambdaDefaults';
 
+export interface StubHandlerProps {
+  readonly jobsTableName?: string;
+}
+
 export class StubHandler extends Construct {
   readonly lambdaHandler: NodejsFunction;
 
-  constructor(scope: Construct, id: string) {
+  constructor(scope: Construct, id: string, props?: StubHandlerProps) {
     super(scope, id);
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
@@ -14,6 +18,9 @@ export class StubHandler extends Construct {
       description: 'Stub handler that logs all GitHub events',
       memorySize: 256,
       timeout: Duration.seconds(30),
+      environment: {
+        JOBS_TABLE_NAME: props?.jobsTableName || '',
+      },
     });
   }
 }

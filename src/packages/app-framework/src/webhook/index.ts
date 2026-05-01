@@ -235,7 +235,8 @@ export class WebhookIngestion extends Construct {
 
     const alert = new AlertHandler(this, 'Alert');
 
-    const stub = new StubHandler(this, 'StubHandler');
+    const stub = new StubHandler(this, 'StubHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(stub.lambdaHandler);
 
     if (
       props.gitHubClientId &&
@@ -310,7 +311,8 @@ export class WebhookIngestion extends Construct {
       });
     }
 
-    const prHandler = new PRHandler(this, 'PRHandler');
+    const prHandler = new PRHandler(this, 'PRHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(prHandler.lambdaHandler);
     new Rule(this, 'PullRequestRule', {
       eventBus: this.eventBus,
       eventPattern: {
@@ -324,7 +326,8 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const pushHandler = new PushHandler(this, 'PushHandler');
+    const pushHandler = new PushHandler(this, 'PushHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(pushHandler.lambdaHandler);
     new Rule(this, 'PushRule', {
       eventBus: this.eventBus,
       eventPattern: {
@@ -338,7 +341,8 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler');
+    const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(checkRunHandler.lambdaHandler);
     new Rule(this, 'CheckRunRule', {
       eventBus: this.eventBus,
       eventPattern: {
@@ -352,7 +356,8 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler');
+    const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(deploymentHandler.lambdaHandler);
     new Rule(this, 'DeploymentRule', {
       eventBus: this.eventBus,
       eventPattern: {
@@ -366,7 +371,8 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler');
+    const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler', { jobsTableName: this.jobsTable?.tableName });
+    this.jobsTable?.grantWriteData(discussionHandler.lambdaHandler);
     new Rule(this, 'DiscussionRule', {
       eventBus: this.eventBus,
       eventPattern: {

@@ -1,3 +1,4 @@
+import { isAlreadyProcessed } from '../utils/idempotency';
 import { publishEventProcessed } from '../utils/metrics';
 
 // prettier-ignore
@@ -13,6 +14,9 @@ interface EventDetail {
 }
 
 export const handler = async (event: EventDetail): Promise<void> => {
+  const isDuplicate = await isAlreadyProcessed(event.detail.delivery_id, 'discussionHandler');
+  if (isDuplicate) return;
+
   publishEventProcessed({
     appId: (event.detail as any).installation?.id,
     orgName: (event.detail as any).organization?.login,
