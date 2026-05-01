@@ -255,9 +255,11 @@ export class WebhookIngestion extends Construct {
           props.installationTokenFunctionName || '',
         installationTokenLambdaArn: props.installationTokenLambdaArn || '',
         tokenEncryptionKeyArn: this.userTokensTable.encryptionKey?.keyArn,
+        jobsTableName: this.jobsTable?.tableName || '',
       });
 
       this.userTokensTable.grantReadWriteData(comment.lambdaHandler);
+      this.jobsTable?.grantReadWriteData(comment.lambdaHandler);
       this.userTokensTable.encryptionKey?.grantEncryptDecrypt(
         comment.lambdaHandler,
       );

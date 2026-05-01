@@ -4,6 +4,7 @@ import {
   CommandContext,
 } from './commands';
 import { authorizeUser } from '../auth/authorizeUser';
+import { isAlreadyProcessed } from '../utils/idempotency';
 import { postComment } from '../orchestration/reportComment';
 import { publishEventProcessed, publishCommandExecuted, publishAuthResult, publishError, EventMetricContext } from '../utils/metrics';
 
@@ -90,6 +91,11 @@ export const handler = async (event: CommentEvent): Promise<void> => {
   }
 
   if (detail.action !== 'created') {
+    return;
+  }
+
+  const isDuplicate = await isAlreadyProcessed(detail.delivery_id, 'commentHandler');
+  if (isDuplicate) {
     return;
   }
 
