@@ -77,4 +77,20 @@ program
       process.exit(1);
     }
   });
+// subcommand - device-flow-auth
+program
+  .command('device-flow-auth')
+  .description('Authorize a GitHub user via OAuth Device Flow and store token in DynamoDB')
+  .requiredOption('--client-id <clientId>', 'GitHub App Client ID')
+  .requiredOption('--user-tokens-table <tableName>', 'DynamoDB UserTokens table name')
+  .option('--kms-key-arn <keyArn>', 'KMS key ARN for token encryption')
+  .action(async (options) => {
+    try {
+      const { deviceFlowAuth } = await import('./deviceFlowAuth');
+      await deviceFlowAuth(options.clientId, options.userTokensTable, options.kmsKeyArn);
+    } catch (error) {
+      console.error('Device flow auth failed:', error);
+      process.exit(1);
+    }
+  });
 program.parse(process.argv);
