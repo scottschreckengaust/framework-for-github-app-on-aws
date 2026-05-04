@@ -28,7 +28,6 @@ export class CICheckWorkflow extends Construct {
         type: 1,
         value: {
           'action': 'create',
-          'token.$': '$.token',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'headSha.$': '$.headSha',
@@ -53,7 +52,6 @@ export class CICheckWorkflow extends Construct {
         type: 1,
         value: {
           'action': 'complete',
-          'token.$': '$.token',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'checkRunId.$': '$.createResult.checkRunId',
@@ -79,7 +77,7 @@ export class CICheckWorkflow extends Construct {
       logs: {
         destination: logGroup,
         level: LogLevel.ALL,
-        includeExecutionData: true,
+        includeExecutionData: false,
       },
     });
   }

@@ -5,6 +5,7 @@ export interface CommandContext {
   repo: string;
   issueNumber: number;
   sender: string;
+  userId: number;
 }
 
 export type CommandHandler = (ctx: CommandContext) => Promise<void>;
