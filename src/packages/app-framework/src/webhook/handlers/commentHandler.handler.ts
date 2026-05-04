@@ -165,6 +165,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
       repo,
       issueNumber: detail.payload.issue.number,
       sender: detail.sender.login,
+      userId: detail.sender.id,
     };
 
     const commandHandler = getCommandHandler(cmdName) || getDefaultHandler();

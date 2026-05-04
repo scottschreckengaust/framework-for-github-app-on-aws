@@ -15,19 +15,17 @@ export async function handleCheck(ctx: CommandContext): Promise<void> {
     return;
   }
 
-  // For PRs, we need the head SHA. For now use a placeholder.
-  // In production, this would come from the PR event payload.
   const headSha = ctx.args || 'HEAD';
 
   const result = await startExecution({
     stateMachineArn,
     input: {
-      token: ctx.token,
       owner: ctx.owner,
       repo: ctx.repo,
       headSha,
+      userId: ctx.userId,
     },
-    userId: 0,
+    userId: ctx.userId || 0,
     repoFullName: `${ctx.owner}/${ctx.repo}`,
   });
 

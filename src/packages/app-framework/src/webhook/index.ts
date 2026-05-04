@@ -235,7 +235,12 @@ export class WebhookIngestion extends Construct {
     const jobs = new JobsTable(this, 'Jobs');
     this.jobsTable = jobs.table;
 
-    const checkRunStep = new CheckRunStep(this, 'CheckRunStep');
+    const checkRunStep = new CheckRunStep(this, 'CheckRunStep', {
+      appId: props.appId || '',
+      nodeId: props.nodeId || '',
+      installationTokenFunctionName: props.installationTokenFunctionName || '',
+      installationTokenLambdaArn: props.installationTokenLambdaArn || '',
+    });
     const ciCheckWorkflow = new CICheckWorkflow(this, 'CICheckWorkflow', {
       checkRunStepFunction: checkRunStep.lambdaHandler,
     });
