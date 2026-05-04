@@ -145,8 +145,8 @@ The Smithy client over Function URLs requires SigV4 signing which is fragile wit
 ### Negative
 - EventBridge 256KB limit requires S3 indirection for large payloads
 - API Gateway 10MB limit theoretically below GitHub's 25MB max (mitigated by CloudWatch alarm)
-- Comment handler currently monolithic — needs refactoring to route to downstream handlers per command
-- OAuth tokens stored as plaintext in DynamoDB (design spec calls for KMS encryption — not yet implemented)
+- ~~Comment handler currently monolithic~~ (Resolved: Command router pattern implemented in PR #13)
+- ~~OAuth tokens stored as plaintext in DynamoDB~~ (Resolved: KMS dual-layer encryption implemented in PR #13)
 
 ### Risks
 - GitHub webhook retry storm if receiver Lambda is slow (mitigated by idempotency + immediate 200 return)
@@ -154,13 +154,14 @@ The Smithy client over Function URLs requires SigV4 signing which is fragile wit
 - WAF rule exclusions reduce protection surface (mitigated by signature verification as primary trust boundary)
 
 ## Future Work
-- Refactor comment handler into router + per-command downstream handlers
-- Add `commit_comment` and `pull_request_review_comment` event routing
-- Implement KMS envelope encryption for OAuth tokens at rest
-- Add health check metric on periodic ping events
-- Webhook receiver JSON response format
+- ~~Refactor comment handler into router + per-command downstream handlers~~ — Done (PR #13)
+- ~~Add `commit_comment` and `pull_request_review_comment` event routing~~ — Done (PR #13)
+- ~~Implement KMS envelope encryption for OAuth tokens at rest~~ — Done (PR #13)
+- ~~Add health check metric on periodic ping events~~ — Done as scheduled Lambda (PR #19)
+- ~~Webhook receiver JSON response format~~ — Done (PR #13)
 - Delivery audit log with CloudWatch Logs Insights or dedicated archive
-- Device flow CLI tool in ops-tools package
+- ~~Device flow CLI tool in ops-tools package~~ — Done (PR #20)
+- ~~Handler-level idempotency~~ — Done (PR #21)
 
 ## References
 - [Design Spec](../docs/superpowers/specs/2026-04-26-ai3-mvp-design.md)

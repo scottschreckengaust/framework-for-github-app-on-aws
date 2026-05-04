@@ -159,7 +159,7 @@ npm install -g @aws/app-framework-for-github-apps-on-aws-ops-tools
 
 ### CLI Commands
 
-The app-framework-for-github-apps-on-aws-ops-tools CLI provides two sub commands
+The app-framework-for-github-apps-on-aws-ops-tools CLI provides four sub commands
 
 1. `get-table-name` - List the available DynamoDB tables
 1. `import-private-key` - To import GitHub App private key into AWS KMS.
@@ -180,6 +180,11 @@ Options:
 Commands:
   get-table-name                                        Displays App tables with FrameworkForGitHubAppOnAwsManaged tag
   import-private-key <pemFilePath> <appId> <tableName>  Import GitHub App private key into AWS KMS
+  redrive <delivery-id> <table-name>                    Clear idempotency record for webhook reprocessing
+  device-flow-auth                                      Authorize a GitHub user via OAuth Device Flow
+    --client-id <id>                                    GitHub App Client ID (required)
+    --user-tokens-table <table>                         DynamoDB UserTokens table name (required)
+    --kms-key-arn <arn>                                 KMS key ARN for token encryption (optional)
   help [command]                                      display help for command
 ```
 
@@ -255,7 +260,7 @@ The app framework simplifies the key rotation process:
 
 1. Generate a new private key in your GitHub App settings
 
-1. Run the [import process steps](https://github.com/amazon-ospo/framework-for-github-app-on-aws/edit/main/README.md#running-scripts)
+1. Run the [import process steps](../../README.md)
 
 1. The tool automatically:
    - Creates a new KMS key

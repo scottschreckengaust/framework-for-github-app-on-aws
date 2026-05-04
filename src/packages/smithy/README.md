@@ -1,6 +1,6 @@
-# Genet Smithy Models
+# Smithy Models
 
-The Genet Service Smithy model consists of:
+The Smithy model consists of:
 
 - Credential Management Service:
   - `/tokens/installation` API endpoint:
