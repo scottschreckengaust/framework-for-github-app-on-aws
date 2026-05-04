@@ -27,10 +27,12 @@ If your AWS account is deleted or all resources are removed, here's how to recre
 AWS_PROFILE=<your-profile> aws sts get-caller-identity
 
 # Verify Node.js, CDK, yarn
-node --version   # >= 18
+node --version   # >= 22
 cdk --version
 yarn --version
 ```
+
+> **Note:** If your AWS account has changed, update your AWS CLI profile. The profile name may differ from the original deployment (e.g., `burner2` → `burner1`). Verify with `aws sts get-caller-identity` before proceeding.
 
 #### 2. Bootstrap CDK (if new account)
 
@@ -111,7 +113,30 @@ Go to `github.com/organizations/<org>/settings/apps/<app-name>`:
 - **Webhook secret**: Set to the value from Step 4
 - **Callback URL**: Set to `https://<api-gateway-id>.execute-api.<region>.amazonaws.com/prod/auth/callback`
 
-#### 8. Verify
+> **Future automation:** Updating webhook URL/secret requires browser access or App-authenticated API calls (JWT signed with the private key). A future ops-tools CLI command could automate this using the imported KMS key to sign the JWT.
+
+#### 8. Re-Authorize Users (Device Flow)
+
+Users must re-authorize since the UserTokens table is empty. Use the device flow CLI:
+
+```bash
+cd src/packages/app-framework-ops-tools
+AWS_PROFILE=<profile> npx ts-node src/app-framework-cli.ts device-flow-auth \
+  --client-id <GITHUB_CLIENT_ID> \
+  --user-tokens-table <USER_TOKENS_TABLE> \
+  --kms-key-arn <TOKEN_ENCRYPTION_KEY_ARN>
+```
+
+Find the KMS key:
+```bash
+AWS_PROFILE=<profile> aws kms list-keys --region <REGION> --query 'Keys[*].KeyId' --output text | tr '\t' '\n' | while read k; do
+  AWS_PROFILE=<profile> aws kms describe-key --key-id "$k" --region <REGION> --query 'KeyMetadata.{Id:KeyId,Desc:Description}' --output text 2>/dev/null
+done | grep -i token
+```
+
+> **Important:** This must be done BEFORE testing bot commands — without a valid OAuth token, the bot cannot respond even though the webhook pipeline is working.
+
+#### 9. Verify
 
 **Test webhook:**
 ```bash
@@ -125,9 +150,9 @@ Star/unstar a repo in the org. Check CloudWatch logs for the stub handler.
 **Test OAuth:**
 Run the device flow or visit the login URL in a browser.
 
-#### 9. Users Must Re-Authorize
+#### 10. Users Must Re-Authorize (Automatic)
 
-The UserTokens table is empty. Each user will need to click the OAuth authorization link again the next time they mention `@ai3-mvp`. The bot will prompt them automatically.
+The UserTokens table is empty. Any user who did NOT use the device flow in Step 8 will need to click the OAuth authorization link again the next time they mention `@ai3-mvp`. The bot will prompt them automatically.
 
 ---
 
