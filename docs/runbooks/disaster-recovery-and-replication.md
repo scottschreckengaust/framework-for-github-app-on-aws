@@ -185,7 +185,7 @@ The App Table now has two rows:
 
 | AppId | KmsKeyArn |
 |-------|-----------|
-| 3501081 | arn:aws:kms:...:key/aaa |
+| <APP_ID> | arn:aws:kms:...:key/aaa |
 | <new-id> | arn:aws:kms:...:key/bbb |
 
 #### 3. Install the App on the New Org
@@ -249,11 +249,11 @@ Comment `@ai3-mvp-<new-org> hello` on a PR in the new org. The comment handler w
 
 ```
 App Table (DynamoDB):
-  AppId=3501081 → KmsKeyArn=key/aaa (sbalswa)
+  AppId=<APP_ID> → KmsKeyArn=key/aaa (sbalswa)
   AppId=<new>   → KmsKeyArn=key/bbb (new-org)
 
 Installation Table (DynamoDB):
-  AppId=3501081, NodeId=O_kgDOD4tz5Q → sbalswa
+  AppId=<APP_ID>, NodeId=O_kgDOD4tz5Q → sbalswa
   AppId=<new>,   NodeId=<new-node>   → new-org
 
 UserTokens Table (DynamoDB):

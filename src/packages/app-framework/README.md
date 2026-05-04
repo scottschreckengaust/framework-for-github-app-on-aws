@@ -9,7 +9,7 @@ with minimal custom code.
 
 ## Overview
 
-The Genet Credential Manager is a nested CDK stack and Level 3 (L3) construct
+The Credential Manager is a nested CDK stack and Level 3 (L3) construct
 that helps you manage GitHub App credentials on AWS.
 It securely stores your app's private key,
 creates short-lived App Tokens using AWS KMS,
@@ -204,7 +204,7 @@ const client = new AppFrameworkClient({
   endpoint: '<your deployed Lambda Function URL>',
   region: '<your AWS region>',
   credentials: '<your AWS credential provider>', 
-  sha256: Sha256, // Sha256 hsing algorithm
+  sha256: Sha256, // Sha256 hashing algorithm
 });
 ```
 

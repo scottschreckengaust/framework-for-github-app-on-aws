@@ -34,6 +34,7 @@ jspm_packages/
 cdk.out
 __snapshots__
 classpath.json
+.remember
 /test-reports/
 junit.xml
 /coverage/

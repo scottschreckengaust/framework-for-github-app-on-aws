@@ -54,13 +54,13 @@ AWS_PROFILE=<profile> aws kms list-keys --region us-east-1 \
   done | grep -i token
 ```
 
-#### Example (ai3-mvp on sbalswa)
+#### Example (replace with your values)
 
 ```bash
-AWS_PROFILE=burner2 npx ts-node src/app-framework-cli.ts device-flow-auth \
-  --client-id Iv23li6ndiRoICMS3xab \
-  --user-tokens-table the-app-framework-test-stack-WebhookIngestionUserTokensTable55E7B5B8-GC4E0APDP7QC \
-  --kms-key-arn arn:aws:kms:us-east-1:361116840407:key/3f894217-4b23-469e-8741-a615b090d5e2
+AWS_PROFILE=<profile> npx ts-node src/app-framework-cli.ts device-flow-auth \
+  --client-id <GITHUB_CLIENT_ID> \
+  --user-tokens-table <USER_TOKENS_TABLE> \
+  --kms-key-arn <TOKEN_ENCRYPTION_KEY_ARN>
 ```
 
 ## Token Lifecycle

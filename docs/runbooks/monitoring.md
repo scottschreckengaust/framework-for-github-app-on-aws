@@ -1,5 +1,19 @@
 # Monitoring Runbook
 
+## Finding Resource Names
+
+All resource names can be found via:
+```bash
+aws cloudformation list-stack-resources --stack-name <STACK_NAME> --region <REGION> \
+  --query 'StackResources[*].{Type:ResourceType,Id:LogicalResourceId,Physical:PhysicalResourceId}' \
+  --output table
+```
+
+Or filter for specific types:
+```bash
+aws logs describe-log-groups --log-group-name-prefix /aws/lambda/<STACK_PREFIX> --query 'logGroups[*].logGroupName'
+```
+
 ## Dashboard
 
 **URL:** https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards/dashboard/ai3-mvp-platform
@@ -30,7 +44,7 @@ AWS_PROFILE=burner2 aws dynamodb get-item \
 
 ```bash
 AWS_PROFILE=burner2 aws logs filter-log-events \
-  --log-group-name the-app-framework-test-stack-WebhookIngestionCICheckWorkflowExecutionLogs0AFE04E5-QzYqW03zfOme \
+  --log-group-name <CI_CHECK_LOG_GROUP> \
   --start-time $(date -d '8 hours ago' +%s000) \
   --region us-east-1 \
   --filter-pattern "<job-id>" \
@@ -41,7 +55,7 @@ AWS_PROFILE=burner2 aws logs filter-log-events \
 
 ```bash
 AWS_PROFILE=burner2 aws logs filter-log-events \
-  --log-group-name /aws/lambda/the-app-framework-test-st-WebhookIngestionCheckRun-CzVaxaCyNic7 \
+  --log-group-name /aws/lambda/<CHECK_RUN_STEP_FUNCTION> \
   --start-time $(date -d '8 hours ago' +%s000) \
   --region us-east-1 \
   --filter-pattern "<job-id>" \
@@ -54,7 +68,7 @@ AWS_PROFILE=burner2 aws logs filter-log-events \
 
 ```bash
 AWS_PROFILE=burner2 aws logs filter-log-events \
-  --log-group-name the-app-framework-test-stack-WebhookIngestionCICheckWorkflowExecutionLogs0AFE04E5-QzYqW03zfOme \
+  --log-group-name <CI_CHECK_LOG_GROUP> \
   --start-time $(date -d '8 hours ago' +%s000) \
   --region us-east-1 \
   --filter-pattern '{ $.type = "ExecutionSucceeded" || $.type = "ExecutionFailed" }' \
@@ -65,7 +79,7 @@ AWS_PROFILE=burner2 aws logs filter-log-events \
 
 ```bash
 AWS_PROFILE=burner2 aws logs tail \
-  the-app-framework-test-stack-WebhookIngestionCICheckWorkflowExecutionLogs0AFE04E5-QzYqW03zfOme \
+  <CI_CHECK_LOG_GROUP> \
   --since 8h --region us-east-1 \
   | python3 -c "
 import sys, json
@@ -85,7 +99,7 @@ for line in sys.stdin:
 
 ```bash
 AWS_PROFILE=burner2 aws logs filter-log-events \
-  --log-group-name /aws/lambda/the-app-framework-test-st-WebhookIngestionCheckRun-CzVaxaCyNic7 \
+  --log-group-name /aws/lambda/<CHECK_RUN_STEP_FUNCTION> \
   --start-time $(date -d '8 hours ago' +%s000) \
   --region us-east-1 \
   --filter-pattern 'INFO' \
@@ -98,7 +112,7 @@ AWS_PROFILE=burner2 aws logs filter-log-events \
 
 ```bash
 AWS_PROFILE=burner2 aws logs tail \
-  /aws/lambda/the-app-framework-test-st-WebhookIngestionCommentH-3XMAqXoApKDe \
+  /aws/lambda/<COMMENT_HANDLER_FUNCTION> \
   --since 1h --region us-east-1
 ```
 
@@ -106,7 +120,7 @@ AWS_PROFILE=burner2 aws logs tail \
 
 ```bash
 AWS_PROFILE=burner2 aws logs tail \
-  /aws/lambda/the-app-framework-test-st-WebhookIngestionReceiver-EwwytlIJmkXW \
+  /aws/lambda/<RECEIVER_FUNCTION> \
   --since 1h --region us-east-1
 ```
 
@@ -114,7 +128,7 @@ AWS_PROFILE=burner2 aws logs tail \
 
 ```bash
 AWS_PROFILE=burner2 aws logs tail \
-  /aws/lambda/the-app-framework-test-st-WebhookIngestionHealthCh-Yoi782ERJhEO \
+  /aws/lambda/<HEALTH_CHECK_FUNCTION> \
   --since 1h --region us-east-1
 ```
 
@@ -140,7 +154,7 @@ When the DLQ alarm fires:
 ```bash
 # See what's in the DLQ
 AWS_PROFILE=burner2 aws logs tail \
-  /aws/lambda/the-app-framework-test-st-WebhookIngestionAlertha-<id> \
+  /aws/lambda/<ALERT_HANDLER_FUNCTION> \
   --since 1h --region us-east-1
 ```
 
