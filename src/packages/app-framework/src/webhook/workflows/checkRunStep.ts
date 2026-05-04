@@ -9,6 +9,8 @@ export interface CheckRunStepProps {
   readonly nodeId: string;
   readonly installationTokenFunctionName: string;
   readonly installationTokenLambdaArn: string;
+  readonly userTokensTableName?: string;
+  readonly tokenEncryptionKeyArn?: string;
 }
 
 export class CheckRunStep extends Construct {
@@ -25,6 +27,8 @@ export class CheckRunStep extends Construct {
         APP_ID: props.appId,
         NODE_ID: props.nodeId,
         INSTALLATION_TOKEN_FUNCTION_NAME: props.installationTokenFunctionName,
+        USER_TOKENS_TABLE_NAME: props.userTokensTableName || '',
+        TOKEN_ENCRYPTION_KEY_ARN: props.tokenEncryptionKeyArn || '',
       },
     });
 
@@ -35,5 +39,25 @@ export class CheckRunStep extends Construct {
         resources: [props.installationTokenLambdaArn],
       }),
     );
+
+    if (props.userTokensTableName) {
+      this.lambdaHandler.addToRolePolicy(
+        new PolicyStatement({
+          actions: ['dynamodb:GetItem'],
+          effect: Effect.ALLOW,
+          resources: [`arn:aws:dynamodb:*:*:table/${props.userTokensTableName}`],
+        }),
+      );
+    }
+
+    if (props.tokenEncryptionKeyArn) {
+      this.lambdaHandler.addToRolePolicy(
+        new PolicyStatement({
+          actions: ['kms:Decrypt'],
+          effect: Effect.ALLOW,
+          resources: [props.tokenEncryptionKeyArn],
+        }),
+      );
+    }
   }
 }

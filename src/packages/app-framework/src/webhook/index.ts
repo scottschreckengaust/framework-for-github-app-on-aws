@@ -240,6 +240,8 @@ export class WebhookIngestion extends Construct {
       nodeId: props.nodeId || '',
       installationTokenFunctionName: props.installationTokenFunctionName || '',
       installationTokenLambdaArn: props.installationTokenLambdaArn || '',
+      userTokensTableName: this.userTokensTable?.tableName,
+      tokenEncryptionKeyArn: this.userTokensTable?.encryptionKey?.keyArn,
     });
     const ciCheckWorkflow = new CICheckWorkflow(this, 'CICheckWorkflow', {
       checkRunStepFunction: checkRunStep.lambdaHandler,
