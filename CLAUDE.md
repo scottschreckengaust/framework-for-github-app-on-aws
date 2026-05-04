@@ -19,11 +19,6 @@
 
 ### Workflow Preferences
 
-- **TDD for new features** — write failing test first, implement, verify
-- **Subagent-driven development** — dispatch parallel agents for independent tasks
-- **Verification before completion** — always deploy + E2E test before claiming done
-- **ADRs for decisions** — if it's a significant choice, document it in `adr/`
-- **Issues for backlog** — P0/P1/P2 with effort, details sufficient for agent pickup
 - **Memory for learnings** — store in project memory for cross-session persistence
 - **Step-by-step for operator** — Scott sees ~30 terminal lines, prefer concise output
 

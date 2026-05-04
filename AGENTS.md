@@ -44,6 +44,14 @@ npx cdk deploy the-app-framework-test-stack \
 cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
 ```
 
+## Workflow Preferences
+
+- **TDD for new features** — write failing test first, implement, verify
+- **Subagent-driven development** — dispatch parallel agents for independent tasks
+- **Verification before completion** — always deploy + E2E test before claiming done
+- **ADRs for decisions** — if it's a significant choice, document it in `adr/`
+- **Issues for backlog** — P0/P1/P2 with effort, details sufficient for agent pickup
+
 ## Conventions
 
 - **Config is managed by Projen.** Never edit `.eslintrc.json`, `package.json`, `tsconfig.json` directly. Edit `.projenrc.ts` then run `npx projen`.

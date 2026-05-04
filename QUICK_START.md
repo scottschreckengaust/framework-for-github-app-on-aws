@@ -5,7 +5,7 @@
 ## Prerequisites
 
 - AWS account with admin access + CLI configured
-- Node.js >= 18, yarn, AWS CDK CLI
+- Node.js >= 22, yarn, AWS CDK CLI
 - A GitHub organization where you can create apps
 
 ## 5-Step Deploy
@@ -44,6 +44,8 @@ npx cdk deploy the-app-framework-test-stack \
   --outputs-file /tmp/cdk-output.json
 ```
 
+> **Security:** For production, replace `AdministratorAccess` on the CDK bootstrap execution role with a scoped policy. See `docs/DEPLOYMENT_PLAN_REFERENCE.md` Phase 1 for the minimal IAM policy.
+
 ### 3. Import Private Key
 
 ```bash
@@ -76,7 +78,7 @@ Bot replies with available commands. Done.
 | Feature | How |
 |---------|-----|
 | Webhook ingestion | API Gateway + WAF + signature verification |
-| Event routing | EventBridge custom bus → per-type handler Lambdas |
+| Event routing | EventBridge custom bus → 8 handler Lambdas (comment, PR, push, check_run, deployment, discussion, stub, alert) |
 | User auth | OAuth Device Flow + web redirect, auto-refresh |
 | Bot commands | `help`, `echo`, `check` (extensible via command map) |
 | CI checks | Step Functions Express workflow → GitHub Check Runs |
@@ -92,8 +94,12 @@ Bot replies with available commands. Done.
 |---------|-------------|
 | `@bot help` | List available commands |
 | `@bot echo <text>` | Echo back text |
-| `@bot check <sha>` | Run CI check (creates GitHub Check Run) |
+| `@bot check <sha>` | Run CI check (creates GitHub Check Run via Step Functions) |
+| `@bot status` | Show running jobs (coming soon) |
+| `@bot deploy <env>` | Deploy to environment (coming soon — Standard workflow) |
 | `/bot <command>` | Same as @bot (slash command alternate) |
+
+> **Workflows:** The `check` command uses an Express workflow (<5 min). Long-running Standard workflows for `deploy` and functional analysis are planned — see Issue #10 for status.
 
 ## Adding a New Command
 
@@ -122,13 +128,12 @@ src/packages/app-framework/src/webhook/
 └── alertHandler.*              # DLQ processor
 ```
 
-## Runbooks
+## Cost & Budgeting
 
-- [Monitoring](docs/runbooks/monitoring.md) — dashboard, logs, job lookup
-- [User Authorization](docs/runbooks/user-authorization.md) — OAuth flow, device flow CLI
-- [Redrive Events](docs/runbooks/redrive-events.md) — reprocess webhook events
-- [Disaster Recovery](docs/runbooks/disaster-recovery-and-replication.md) — recreate from scratch, add new orgs
+See `docs/DEPLOYMENT_PLAN_REFERENCE.md` Appendix D for detailed cost analysis across dev/staging/prod environments.
 
-## Architecture Decision Record
+## Further Reading
 
-- [ADR-0001](adr/0001-ai3-mvp-webhook-oauth-orchestration.md) — full architecture decisions and lessons learned
+- [Architecture Decisions](adr/) — why things are built the way they are
+- [Deployment Plan Reference](docs/DEPLOYMENT_PLAN_REFERENCE.md) — cost model, IAM policies, multi-env setup
+- [Runbooks](docs/runbooks/) — monitoring, auth, disaster recovery, redrive
