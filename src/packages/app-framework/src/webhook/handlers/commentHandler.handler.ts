@@ -4,9 +4,15 @@ import {
   CommandContext,
 } from './commands';
 import { authorizeUser } from '../auth/authorizeUser';
-import { isAlreadyProcessed } from '../utils/idempotency';
 import { postComment } from '../orchestration/reportComment';
-import { publishEventProcessed, publishCommandExecuted, publishAuthResult, publishError, EventMetricContext } from '../utils/metrics';
+import { isAlreadyProcessed } from '../utils/idempotency';
+import {
+  publishEventProcessed,
+  publishCommandExecuted,
+  publishAuthResult,
+  publishError,
+  EventMetricContext,
+} from '../utils/metrics';
 
 const BOT_TRIGGERS = ['@ai3-mvp', '/ai3-mvp'];
 
@@ -40,7 +46,8 @@ async function getInstallationToken(): Promise<string | null> {
     );
     /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
-    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
+    const accountId =
+      (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
     const event = {
       version: '2.0',
       routeKey: 'POST /tokens/installation',
@@ -71,7 +78,9 @@ async function getInstallationToken(): Promise<string | null> {
     );
     const respPayload = JSON.parse(new TextDecoder().decode(resp.Payload));
     if (respPayload.statusCode !== 200) {
-      console.error('Installation token error', { statusCode: respPayload?.statusCode });
+      console.error('Installation token error', {
+        statusCode: respPayload?.statusCode,
+      });
       return null;
     }
     const body = JSON.parse(respPayload.body);
@@ -95,7 +104,10 @@ export const handler = async (event: CommentEvent): Promise<void> => {
     return;
   }
 
-  const isDuplicate = await isAlreadyProcessed(detail.delivery_id, 'commentHandler');
+  const isDuplicate = await isAlreadyProcessed(
+    detail.delivery_id,
+    'commentHandler',
+  );
   if (isDuplicate) {
     return;
   }

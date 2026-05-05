@@ -17,7 +17,10 @@ interface GitHubEventBridgeEvent {
 export const handler = async (
   event: GitHubEventBridgeEvent,
 ): Promise<{ received: boolean }> => {
-  const isDuplicate = await isAlreadyProcessed(event.detail.delivery_id, 'stubHandler');
+  const isDuplicate = await isAlreadyProcessed(
+    event.detail.delivery_id,
+    'stubHandler',
+  );
   if (isDuplicate) return { received: false };
 
   publishEventProcessed({

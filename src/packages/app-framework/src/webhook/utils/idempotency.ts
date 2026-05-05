@@ -36,7 +36,10 @@ export async function isAlreadyProcessed(
     return false;
   } catch (e) {
     if (e instanceof ConditionalCheckFailedException) {
-      console.log('Duplicate delivery at handler level', { deliveryId, handlerName });
+      console.log('Duplicate delivery at handler level', {
+        deliveryId,
+        handlerName,
+      });
       return true;
     }
     throw e;

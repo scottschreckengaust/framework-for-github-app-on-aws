@@ -20,7 +20,8 @@ export class HealthCheck extends Construct {
 
     this.lambdaHandler = new NodejsFunction(this, 'handler', {
       ...LAMBDA_DEFAULTS,
-      description: 'Health check: verifies Credential Manager + GitHub API connectivity',
+      description:
+        'Health check: verifies Credential Manager + GitHub API connectivity',
       memorySize: 256,
       timeout: Duration.seconds(30),
       environment: {

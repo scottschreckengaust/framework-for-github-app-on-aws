@@ -38,6 +38,7 @@ import { DeploymentHandler } from './handlers/deploymentHandler';
 import { DiscussionHandler } from './handlers/discussionHandler';
 import { PRHandler } from './handlers/prHandler';
 import { PushHandler } from './handlers/pushHandler';
+import { SecurityHandlers } from './handlers/security/securityHandlers';
 import { StubHandler } from './handlers/stubHandler';
 import { HealthCheck } from './healthCheck';
 import { JobsTable } from './orchestration/jobsTable';
@@ -249,7 +250,9 @@ export class WebhookIngestion extends Construct {
 
     const alert = new AlertHandler(this, 'Alert');
 
-    const stub = new StubHandler(this, 'StubHandler', { jobsTableName: this.jobsTable?.tableName });
+    const stub = new StubHandler(this, 'StubHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(stub.lambdaHandler);
 
     if (
@@ -327,7 +330,9 @@ export class WebhookIngestion extends Construct {
       });
     }
 
-    const prHandler = new PRHandler(this, 'PRHandler', { jobsTableName: this.jobsTable?.tableName });
+    const prHandler = new PRHandler(this, 'PRHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(prHandler.lambdaHandler);
     new Rule(this, 'PullRequestRule', {
       eventBus: this.eventBus,
@@ -342,7 +347,9 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const pushHandler = new PushHandler(this, 'PushHandler', { jobsTableName: this.jobsTable?.tableName });
+    const pushHandler = new PushHandler(this, 'PushHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(pushHandler.lambdaHandler);
     new Rule(this, 'PushRule', {
       eventBus: this.eventBus,
@@ -357,7 +364,9 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler', { jobsTableName: this.jobsTable?.tableName });
+    const checkRunHandler = new CheckRunHandler(this, 'CheckRunHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(checkRunHandler.lambdaHandler);
     new Rule(this, 'CheckRunRule', {
       eventBus: this.eventBus,
@@ -372,7 +381,9 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler', { jobsTableName: this.jobsTable?.tableName });
+    const deploymentHandler = new DeploymentHandler(this, 'DeploymentHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(deploymentHandler.lambdaHandler);
     new Rule(this, 'DeploymentRule', {
       eventBus: this.eventBus,
@@ -387,7 +398,9 @@ export class WebhookIngestion extends Construct {
       ],
     });
 
-    const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler', { jobsTableName: this.jobsTable?.tableName });
+    const discussionHandler = new DiscussionHandler(this, 'DiscussionHandler', {
+      jobsTableName: this.jobsTable?.tableName,
+    });
     this.jobsTable?.grantWriteData(discussionHandler.lambdaHandler);
     new Rule(this, 'DiscussionRule', {
       eventBus: this.eventBus,
@@ -401,6 +414,76 @@ export class WebhookIngestion extends Construct {
         }),
       ],
     });
+
+    if (
+      props.installationTokenFunctionName &&
+      props.installationTokenLambdaArn
+    ) {
+      const securityHandlers = new SecurityHandlers(this, 'SecurityHandlers', {
+        appId: props.appId || '',
+        nodeId: props.nodeId || '',
+        installationTokenFunctionName: props.installationTokenFunctionName,
+        installationTokenLambdaArn: props.installationTokenLambdaArn,
+        jobsTableName: this.jobsTable?.tableName,
+      });
+
+      this.jobsTable?.grantWriteData(securityHandlers.secretScanningHandler);
+      this.jobsTable?.grantWriteData(securityHandlers.codeScanningHandler);
+      this.jobsTable?.grantWriteData(securityHandlers.dependabotHandler);
+      this.jobsTable?.grantWriteData(securityHandlers.securityAdvisoryHandler);
+
+      new Rule(this, 'SecretScanningRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['secret_scanning_alert'],
+        },
+        targets: [
+          new LambdaFunction(securityHandlers.secretScanningHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+
+      new Rule(this, 'CodeScanningRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['code_scanning_alert'],
+        },
+        targets: [
+          new LambdaFunction(securityHandlers.codeScanningHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+
+      new Rule(this, 'DependabotRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['dependabot_alert'],
+        },
+        targets: [
+          new LambdaFunction(securityHandlers.dependabotHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+
+      new Rule(this, 'SecurityAdvisoryRule', {
+        eventBus: this.eventBus,
+        eventPattern: {
+          source: ['github'],
+          detailType: ['security_advisory'],
+        },
+        targets: [
+          new LambdaFunction(securityHandlers.securityAdvisoryHandler, {
+            deadLetterQueue: alert.dlq,
+          }),
+        ],
+      });
+    }
 
     new Rule(this, 'AllEventsRule', {
       eventBus: this.eventBus,
@@ -435,8 +518,7 @@ export class WebhookIngestion extends Construct {
 
     const dlqAlarm = new Alarm(this, 'DLQDepthAlarm', {
       alarmName: 'ai3-mvp-dlq-not-empty',
-      alarmDescription:
-        'DLQ has messages - handler failures detected',
+      alarmDescription: 'DLQ has messages - handler failures detected',
       metric: alert.dlq.metricApproximateNumberOfMessagesVisible({
         period: Duration.minutes(5),
       }),
@@ -462,19 +544,25 @@ export class WebhookIngestion extends Construct {
     dashboard.addWidgets(
       new GraphWidget({
         title: 'Events Processed by Handler',
-        left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,EventType,HandlerName,OrgName,service} MetricName=\"EventProcessed\"', 'Sum', 300)",
-          label: '',
-        })],
+        left: [
+          new MathExpression({
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,EventType,HandlerName,OrgName,service} MetricName=\"EventProcessed\"', 'Sum', 300)",
+            label: '',
+          }),
+        ],
         width: 8,
         height: 6,
       }),
       new GraphWidget({
         title: 'Commands Executed',
-        left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,Command,HandlerName,OrgName,service} MetricName=\"CommandExecuted\"', 'Sum', 300)",
-          label: '',
-        })],
+        left: [
+          new MathExpression({
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,Command,HandlerName,OrgName,service} MetricName=\"CommandExecuted\"', 'Sum', 300)",
+            label: '',
+          }),
+        ],
         width: 8,
         height: 6,
       }),
@@ -482,11 +570,13 @@ export class WebhookIngestion extends Construct {
         title: 'Auth Results',
         left: [
           new MathExpression({
-            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthSuccess\"', 'Sum', 300)",
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthSuccess\"', 'Sum', 300)",
             label: 'Auth Success',
           }),
           new MathExpression({
-            expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthFailed\"', 'Sum', 300)",
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"AuthFailed\"', 'Sum', 300)",
             label: 'Auth Failed',
           }),
         ],
@@ -498,24 +588,45 @@ export class WebhookIngestion extends Construct {
     dashboard.addWidgets(
       new GraphWidget({
         title: 'Errors by Handler',
-        left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"ErrorOccurred\"', 'Sum', 300)",
-          label: '',
-        })],
+        left: [
+          new MathExpression({
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,HandlerName,OrgName,service} MetricName=\"ErrorOccurred\"', 'Sum', 300)",
+            label: '',
+          }),
+        ],
         width: 8,
         height: 6,
       }),
       new GraphWidget({
         title: 'DLQ Depth',
-        left: [alert.dlq.metricApproximateNumberOfMessagesVisible({ period: Duration.minutes(5) })],
+        left: [
+          alert.dlq.metricApproximateNumberOfMessagesVisible({
+            period: Duration.minutes(5),
+          }),
+        ],
         width: 8,
         height: 6,
       }),
       new GraphWidget({
         title: 'API Gateway 4XX / 5XX',
         left: [
-          new Metric({ namespace: 'AWS/ApiGateway', metricName: '4XXError', dimensionsMap: { ApiName: 'ai3-mvp-webhook' }, period: Duration.minutes(5), statistic: 'Sum', label: '4XX' }),
-          new Metric({ namespace: 'AWS/ApiGateway', metricName: '5XXError', dimensionsMap: { ApiName: 'ai3-mvp-webhook' }, period: Duration.minutes(5), statistic: 'Sum', label: '5XX' }),
+          new Metric({
+            namespace: 'AWS/ApiGateway',
+            metricName: '4XXError',
+            dimensionsMap: { ApiName: 'ai3-mvp-webhook' },
+            period: Duration.minutes(5),
+            statistic: 'Sum',
+            label: '4XX',
+          }),
+          new Metric({
+            namespace: 'AWS/ApiGateway',
+            metricName: '5XXError',
+            dimensionsMap: { ApiName: 'ai3-mvp-webhook' },
+            period: Duration.minutes(5),
+            statistic: 'Sum',
+            label: '5XX',
+          }),
         ],
         width: 8,
         height: 6,
@@ -540,19 +651,31 @@ export class WebhookIngestion extends Construct {
     dashboard.addWidgets(
       new GraphWidget({
         title: 'Health Check',
-        left: [new MathExpression({
-          expression: "SEARCH('{GitHubAppPlatform,AppId,CheckType,service} MetricName=\"HealthCheckSuccess\"', 'Average', 300)",
-          label: '',
-        })],
+        left: [
+          new MathExpression({
+            expression:
+              "SEARCH('{GitHubAppPlatform,AppId,CheckType,service} MetricName=\"HealthCheckSuccess\"', 'Average', 300)",
+            label: '',
+          }),
+        ],
         width: 8,
         height: 6,
       }),
       new GraphWidget({
         title: 'Step Functions Executions',
         left: [
-          ciCheckWorkflow.stateMachine.metricStarted({ period: Duration.minutes(5), label: 'Started' }),
-          ciCheckWorkflow.stateMachine.metricSucceeded({ period: Duration.minutes(5), label: 'Succeeded' }),
-          ciCheckWorkflow.stateMachine.metricFailed({ period: Duration.minutes(5), label: 'Failed' }),
+          ciCheckWorkflow.stateMachine.metricStarted({
+            period: Duration.minutes(5),
+            label: 'Started',
+          }),
+          ciCheckWorkflow.stateMachine.metricSucceeded({
+            period: Duration.minutes(5),
+            label: 'Succeeded',
+          }),
+          ciCheckWorkflow.stateMachine.metricFailed({
+            period: Duration.minutes(5),
+            label: 'Failed',
+          }),
         ],
         width: 8,
         height: 6,

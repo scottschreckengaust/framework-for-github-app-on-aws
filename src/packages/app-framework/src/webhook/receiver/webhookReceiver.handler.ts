@@ -140,7 +140,11 @@ export const handler = async (
     return {
       statusCode: 400,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'error', reason: 'invalid_json', deliveryId }),
+      body: JSON.stringify({
+        status: 'error',
+        reason: 'invalid_json',
+        deliveryId,
+      }),
     };
   }
 

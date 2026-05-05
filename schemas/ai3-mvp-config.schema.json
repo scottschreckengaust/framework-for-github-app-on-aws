@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/scottschreckengaust/framework-for-github-app-on-aws/main/schemas/ai3-mvp-config.schema.json",
+  "title": "ai3-mvp Repository Configuration",
+  "description": "Per-repository configuration for the ai3-mvp GitHub App. Place as .github/ai3-mvp.json in your repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference for IDE support"
+    },
+    "security": {
+      "$ref": "#/$defs/securityConfig"
+    }
+  },
+  "$defs": {
+    "actionExpression": {
+      "type": "string",
+      "pattern": "^(block|issue|comment|notify|annotate|ignore)(\\+(block|issue|comment|notify|annotate|ignore))*$",
+      "description": "One or more actions joined by '+'. Available: block, issue, comment, notify, annotate, ignore. Example: 'block+issue+notify'"
+    },
+    "severityActions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "critical": { "$ref": "#/$defs/actionExpression" },
+        "high": { "$ref": "#/$defs/actionExpression" },
+        "medium": { "$ref": "#/$defs/actionExpression" },
+        "low": { "$ref": "#/$defs/actionExpression" }
+      },
+      "description": "Map severity levels to action expressions. Unspecified severities inherit from org or app defaults."
+    },
+    "securityConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Security event handler configuration",
+      "properties": {
+        "code_scanning": { "$ref": "#/$defs/severityActions" },
+        "secret_scanning": { "$ref": "#/$defs/severityActions" },
+        "dependabot": { "$ref": "#/$defs/severityActions" },
+        "security_advisory": { "$ref": "#/$defs/severityActions" }
+      }
+    }
+  }
+}

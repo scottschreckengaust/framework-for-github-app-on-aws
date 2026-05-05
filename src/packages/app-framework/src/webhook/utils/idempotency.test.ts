@@ -3,7 +3,10 @@ jest.mock('@aws-sdk/client-dynamodb', () => ({
   DynamoDBClient: jest.fn().mockImplementation(() => ({ send: mockSend })),
   PutItemCommand: jest.fn().mockImplementation((input) => ({ input })),
   ConditionalCheckFailedException: class ConditionalCheckFailedException extends Error {
-    constructor() { super('Conditional check failed'); this.name = 'ConditionalCheckFailedException'; }
+    constructor() {
+      super('Conditional check failed');
+      this.name = 'ConditionalCheckFailedException';
+    }
   },
 }));
 

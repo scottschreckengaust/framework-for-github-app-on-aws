@@ -45,7 +45,9 @@ export class CheckRunStep extends Construct {
         new PolicyStatement({
           actions: ['dynamodb:GetItem'],
           effect: Effect.ALLOW,
-          resources: [`arn:aws:dynamodb:*:*:table/${props.userTokensTableName}`],
+          resources: [
+            `arn:aws:dynamodb:*:*:table/${props.userTokensTableName}`,
+          ],
         }),
       );
     }

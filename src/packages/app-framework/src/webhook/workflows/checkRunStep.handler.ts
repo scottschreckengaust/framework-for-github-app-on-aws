@@ -34,7 +34,10 @@ export const handler = async (event: {
       throw new Error(`Failed to create check run: ${resp.status} ${text}`);
     }
     const data = (await resp.json()) as { id: number };
-    console.log('Check run created', { checkRunId: data.id, jobId: event.jobId });
+    console.log('Check run created', {
+      checkRunId: data.id,
+      jobId: event.jobId,
+    });
     return { checkRunId: data.id, jobId: event.jobId };
   }
 
@@ -64,7 +67,10 @@ export const handler = async (event: {
       const text = await resp.text();
       throw new Error(`Failed to complete check run: ${resp.status} ${text}`);
     }
-    console.log('Check run completed', { checkRunId: event.checkRunId, jobId: event.jobId });
+    console.log('Check run completed', {
+      checkRunId: event.checkRunId,
+      jobId: event.jobId,
+    });
     return { checkRunId: event.checkRunId!, jobId: event.jobId };
   }
 
@@ -79,7 +85,9 @@ async function getToken(userId?: number): Promise<string | null> {
       console.log('Using user token', { userId });
       return userToken;
     }
-    console.log('User token unavailable, falling back to installation token', { userId });
+    console.log('User token unavailable, falling back to installation token', {
+      userId,
+    });
   }
   // Fallback to installation token
   return getInstallationToken();
@@ -92,13 +100,17 @@ async function getUserToken(userId: number): Promise<string | null> {
 
   try {
     /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
-    const { DynamoDBClient, GetItemCommand } = await import('@aws-sdk/client-dynamodb');
+    const { DynamoDBClient, GetItemCommand } = await import(
+      '@aws-sdk/client-dynamodb'
+    );
     /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const ddb = new DynamoDBClient({});
-    const resp = await ddb.send(new GetItemCommand({
-      TableName: tableName,
-      Key: { GitHubUserId: { N: String(userId) } },
-    }));
+    const resp = await ddb.send(
+      new GetItemCommand({
+        TableName: tableName,
+        Key: { GitHubUserId: { N: String(userId) } },
+      }),
+    );
     if (!resp.Item) return null;
 
     const encryptedToken = resp.Item.EncryptedAccessToken?.S;
@@ -117,9 +129,11 @@ async function getUserToken(userId: number): Promise<string | null> {
       const { KMSClient, DecryptCommand } = await import('@aws-sdk/client-kms');
       /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
       const kms = new KMSClient({});
-      const decResp = await kms.send(new DecryptCommand({
-        CiphertextBlob: Buffer.from(encryptedToken, 'base64'),
-      }));
+      const decResp = await kms.send(
+        new DecryptCommand({
+          CiphertextBlob: Buffer.from(encryptedToken, 'base64'),
+        }),
+      );
       return Buffer.from(decResp.Plaintext!).toString('utf8');
     }
 
@@ -139,10 +153,13 @@ async function getInstallationToken(): Promise<string | null> {
 
   try {
     /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
-    const { LambdaClient, InvokeCommand } = await import('@aws-sdk/client-lambda');
+    const { LambdaClient, InvokeCommand } = await import(
+      '@aws-sdk/client-lambda'
+    );
     /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
-    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
+    const accountId =
+      (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
     const event = {
       version: '2.0',
       routeKey: 'POST /tokens/installation',
@@ -164,11 +181,13 @@ async function getInstallationToken(): Promise<string | null> {
       body: JSON.stringify({ appId: Number(appId), nodeId }),
       isBase64Encoded: false,
     };
-    const resp = await lambda.send(new InvokeCommand({
-      FunctionName: functionName,
-      InvocationType: 'RequestResponse',
-      Payload: JSON.stringify(event),
-    }));
+    const resp = await lambda.send(
+      new InvokeCommand({
+        FunctionName: functionName,
+        InvocationType: 'RequestResponse',
+        Payload: JSON.stringify(event),
+      }),
+    );
     const respPayload = JSON.parse(new TextDecoder().decode(resp.Payload));
     if (respPayload.statusCode !== 200) return null;
     const body = JSON.parse(respPayload.body);
