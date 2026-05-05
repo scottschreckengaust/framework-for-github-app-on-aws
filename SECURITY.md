@@ -5,7 +5,7 @@
 If you discover a security vulnerability, please report it privately:
 
 1. **Do NOT** open a public GitHub issue
-2. Contact the maintainer via [GitHub profile](https://github.com/scottschreckengaust)
+2. Use [private vulnerability reporting](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/security/advisories/new) or contact the maintainer via [GitHub profile](https://github.com/scottschreckengaust)
 3. Include: description, reproduction steps, impact assessment, and suggested fix if possible
 
 ## Response
