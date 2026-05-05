@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+src/content/docs/runbooks/
+src/content/docs/adr/
+src/content/docs/quick-start.md
+src/content/docs/deployment-plan.md
+playwright-report/
+test-results/

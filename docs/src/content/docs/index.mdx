@@ -1,0 +1,46 @@
+---
+title: Framework for GitHub Apps on AWS
+description: A serverless bot platform for GitHub webhook events, OAuth authentication, and Step Functions orchestration.
+template: splash
+hero:
+  tagline: Build powerful GitHub App bots on AWS — serverless, secure, and scalable.
+  actions:
+    - text: Quick Start
+      link: /framework-for-github-app-on-aws/quick-start/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/scottschreckengaust/framework-for-github-app-on-aws
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Overview
+
+This framework provides a production-ready foundation for building GitHub App bots that run entirely on AWS serverless infrastructure.
+
+<CardGrid stagger>
+  <Card title="Quick Start" icon="rocket">
+    Get deployed in 5 steps with our [Quick Start guide](/framework-for-github-app-on-aws/quick-start/).
+  </Card>
+  <Card title="Runbooks" icon="open-book">
+    Operational procedures for [monitoring](/framework-for-github-app-on-aws/runbooks/monitoring/), [auth](/framework-for-github-app-on-aws/runbooks/user-authorization/), [disaster recovery](/framework-for-github-app-on-aws/runbooks/disaster-recovery-and-replication/), and [event redrive](/framework-for-github-app-on-aws/runbooks/redrive-events/).
+  </Card>
+  <Card title="Architecture Decisions" icon="document">
+    Understand the [design choices](/framework-for-github-app-on-aws/adr/0001-ai3-mvp-webhook-oauth-orchestration/) that shaped this system.
+  </Card>
+  <Card title="Architecture Diagram" icon="seti:image">
+    See the full [system architecture](/framework-for-github-app-on-aws/architecture/) at a glance.
+  </Card>
+</CardGrid>
+
+## Key Features
+
+- **Webhook Ingestion** — API Gateway + WAF + HMAC signature verification
+- **Event Routing** — EventBridge custom bus with per-handler idempotency
+- **User Authentication** — OAuth Device Flow + web redirect, auto-refresh tokens
+- **Bot Commands** — Extensible command router (`help`, `echo`, `check`, and more)
+- **CI Checks** — Express Step Functions workflow creating GitHub Check Runs
+- **Monitoring** — CloudWatch dashboard, custom metrics, DLQ alarm
+- **Security** — KMS encryption, WAF protection, least-privilege IAM

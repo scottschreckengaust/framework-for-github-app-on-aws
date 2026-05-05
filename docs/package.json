@@ -1,0 +1,25 @@
+{
+  "name": "framework-github-app-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/prebuild.mjs",
+    "dev": "node scripts/prebuild.mjs && astro dev",
+    "start": "node scripts/prebuild.mjs && astro dev",
+    "build": "node scripts/prebuild.mjs && astro build",
+    "preview": "astro preview",
+    "test": "npx playwright test",
+    "test:a11y": "npx playwright test --project=desktop --project=mobile",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.7.0",
+    "@astrojs/starlight": "^0.34.0",
+    "sharp": "^0.33.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.0",
+    "@axe-core/playwright": "^4.10.0"
+  }
+}
