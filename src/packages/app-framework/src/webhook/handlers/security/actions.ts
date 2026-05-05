@@ -34,8 +34,9 @@ async function executeBlock(ctx: ActionContext): Promise<void> {
 
 async function executeIssue(ctx: ActionContext): Promise<void> {
   const { octokit, finding } = ctx;
+  const issueTitle = `[Security] ${finding.title}`;
 
-  const existing = await octokit.issues.listForRepo({
+  const openIssues = await octokit.issues.listForRepo({
     owner: finding.repo.owner,
     repo: finding.repo.name,
     state: 'open',
@@ -43,15 +44,44 @@ async function executeIssue(ctx: ActionContext): Promise<void> {
     per_page: 100,
   });
 
-  const duplicate = existing.data.find(
-    (i) => i.title === `[Security] ${finding.title}`,
-  );
-  if (duplicate) return;
+  if (openIssues.data.find((i) => i.title === issueTitle)) return;
+
+  // Check for a closed issue to reopen (handles reopened/reintroduced alerts)
+  const closedIssues = await octokit.issues.listForRepo({
+    owner: finding.repo.owner,
+    repo: finding.repo.name,
+    state: 'closed',
+    labels: `security,${finding.source}`,
+    per_page: 100,
+  });
+
+  const previousIssue = closedIssues.data.find((i) => i.title === issueTitle);
+  if (previousIssue) {
+    await octokit.issues.update({
+      owner: finding.repo.owner,
+      repo: finding.repo.name,
+      issue_number: previousIssue.number,
+      state: 'open',
+    });
+    await octokit.issues.createComment({
+      owner: finding.repo.owner,
+      repo: finding.repo.name,
+      issue_number: previousIssue.number,
+      body: [
+        `:rotating_light: **Alert reopened**`,
+        '',
+        `This finding has reappeared. Severity: **${finding.severity}**`,
+        '',
+        `[View alert](${finding.htmlUrl})`,
+      ].join('\n'),
+    });
+    return;
+  }
 
   await octokit.issues.create({
     owner: finding.repo.owner,
     repo: finding.repo.name,
-    title: `[Security] ${finding.title}`,
+    title: issueTitle,
     body: [
       `**Severity:** ${finding.severity}`,
       `**Tool:** ${finding.tool ?? 'Unknown'}`,
