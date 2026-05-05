@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/scottschreckengaust/framework-for-github-app-on-aws/main/schemas/ai3-mvp-config.schema.json",
+  "title": "ai3-mvp Repository Configuration",
+  "description": "Per-repository configuration for the ai3-mvp GitHub App. Place as .github/ai3-mvp.json in your repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference for IDE support"
+    },
+    "security": {
+      "$ref": "#/$defs/securityConfig"
+    }
+  },
+  "$defs": {
+    "actionList": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "const": "ignore" },
+          "minItems": 1,
+          "maxItems": 1,
+          "description": "Explicitly suppress all actions for this severity. Must be the only element."
+        },
+        {
+          "type": "array",
+          "items": { "enum": ["block", "issue", "comment", "notify", "annotate"] },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "One or more actions to execute. Precedence rules: 'block' supersedes 'annotate' (both create a Check Run; block's failure conclusion wins)."
+        }
+      ],
+      "description": "Action list for a severity level. Either [\"ignore\"] alone, or one or more of: block, issue, comment, notify, annotate."
+    },
+    "severityActions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "critical": { "$ref": "#/$defs/actionList" },
+        "high": { "$ref": "#/$defs/actionList" },
+        "medium": { "$ref": "#/$defs/actionList" },
+        "low": { "$ref": "#/$defs/actionList" }
+      },
+      "description": "Map severity levels to action lists. Unspecified severities inherit from org or app defaults."
+    },
+    "securityConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Security event handler configuration",
+      "properties": {
+        "code_scanning": { "$ref": "#/$defs/severityActions" },
+        "secret_scanning": { "$ref": "#/$defs/severityActions" },
+        "dependabot": { "$ref": "#/$defs/severityActions" },
+        "security_advisory": { "$ref": "#/$defs/severityActions" }
+      }
+    }
+  }
+}

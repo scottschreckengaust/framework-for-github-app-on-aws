@@ -21,7 +21,10 @@ export function publishEventProcessed(ctx: EventMetricContext): void {
   metrics.publishStoredMetrics();
 }
 
-export function publishCommandExecuted(ctx: EventMetricContext, command: string): void {
+export function publishCommandExecuted(
+  ctx: EventMetricContext,
+  command: string,
+): void {
   metrics.addDimension('AppId', String(ctx.appId || 'unknown'));
   metrics.addDimension('OrgName', ctx.orgName || 'unknown');
   metrics.addDimension('HandlerName', ctx.handlerName);
@@ -30,7 +33,10 @@ export function publishCommandExecuted(ctx: EventMetricContext, command: string)
   metrics.publishStoredMetrics();
 }
 
-export function publishAuthResult(ctx: EventMetricContext, success: boolean): void {
+export function publishAuthResult(
+  ctx: EventMetricContext,
+  success: boolean,
+): void {
   metrics.addDimension('AppId', String(ctx.appId || 'unknown'));
   metrics.addDimension('OrgName', ctx.orgName || 'unknown');
   metrics.addDimension('HandlerName', ctx.handlerName);

@@ -27,7 +27,7 @@ export class CICheckWorkflow extends Construct {
       payload: {
         type: 1,
         value: {
-          'action': 'create',
+          action: 'create',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'headSha.$': '$.headSha',
@@ -52,7 +52,7 @@ export class CICheckWorkflow extends Construct {
       payload: {
         type: 1,
         value: {
-          'action': 'complete',
+          action: 'complete',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'checkRunId.$': '$.createResult.checkRunId',
@@ -63,9 +63,7 @@ export class CICheckWorkflow extends Construct {
       resultPath: '$.completeResult',
     });
 
-    const definition = createCheckRun
-      .next(simulateCI)
-      .next(completeCheckRun);
+    const definition = createCheckRun.next(simulateCI).next(completeCheckRun);
 
     const logGroup = new LogGroup(this, 'ExecutionLogs', {
       retention: RetentionDays.ONE_MONTH,

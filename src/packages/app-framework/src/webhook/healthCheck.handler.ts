@@ -13,9 +13,12 @@ export const handler = async (): Promise<void> => {
   try {
     // Step 1: Get App Token from Credential Manager
     // eslint-disable-next-line import/no-extraneous-dependencies
-    const { LambdaClient, InvokeCommand } = await import('@aws-sdk/client-lambda');
+    const { LambdaClient, InvokeCommand } = await import(
+      '@aws-sdk/client-lambda'
+    );
     const lambda = new LambdaClient({});
-    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
+    const accountId =
+      (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
 
     const event = {
       version: '2.0',
@@ -39,11 +42,13 @@ export const handler = async (): Promise<void> => {
       isBase64Encoded: false,
     };
 
-    const resp = await lambda.send(new InvokeCommand({
-      FunctionName: functionName,
-      InvocationType: 'RequestResponse',
-      Payload: JSON.stringify(event),
-    }));
+    const resp = await lambda.send(
+      new InvokeCommand({
+        FunctionName: functionName,
+        InvocationType: 'RequestResponse',
+        Payload: JSON.stringify(event),
+      }),
+    );
 
     const respPayload = JSON.parse(new TextDecoder().decode(resp.Payload));
     if (respPayload.statusCode !== 200) {
@@ -70,7 +75,7 @@ export const handler = async (): Promise<void> => {
     });
 
     if (ghResp.ok) {
-      const appData = await ghResp.json() as { name: string };
+      const appData = (await ghResp.json()) as { name: string };
       console.log('Health check passed', { app: appData.name });
       await publishHealthMetric(1);
     } else {
@@ -84,7 +89,10 @@ export const handler = async (): Promise<void> => {
 };
 
 async function publishHealthMetric(value: number): Promise<void> {
-  const metrics = new Metrics({ namespace: 'GitHubAppPlatform', serviceName: 'healthCheck' });
+  const metrics = new Metrics({
+    namespace: 'GitHubAppPlatform',
+    serviceName: 'healthCheck',
+  });
   metrics.addDimension('AppId', process.env.APP_ID || 'unknown');
   metrics.addDimension('CheckType', 'GitHubConnectivity');
   metrics.addMetric('HealthCheckSuccess', MetricUnit.Count, value);

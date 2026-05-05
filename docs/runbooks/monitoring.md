@@ -147,6 +147,31 @@ Namespace: `GitHubAppPlatform`
 
 Browse in console: CloudWatch → Metrics → All metrics → `GitHubAppPlatform`
 
+## Troubleshooting: Verify GitHub Actions Before Debugging Handlers
+
+If an expected event doesn't arrive (e.g., `code_scanning_alert`), verify the upstream GitHub Action succeeded first:
+
+```bash
+# Check recent workflow runs for a repo
+gh api repos/<OWNER>/<REPO>/actions/runs --jq '.workflow_runs[:5] | .[] | {id: .id, status: .status, conclusion: .conclusion, name: .name, created: .created_at}'
+```
+
+### Common Failures
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| "actions not allowed" | Org requires pinned SHAs | Use `actions/checkout@<full-sha>` not `@v4` |
+| Workflow never triggers | Missing `on:` trigger or branch filter wrong | Check `.github/workflows/*.yml` |
+| SARIF upload 403 | Code scanning not enabled | Repo must be public or have GHAS |
+| Event in S3 but handler silent | EventBridge rule mismatch | Check `detail-type` matches exactly |
+
+### Verification order
+
+1. **GitHub Actions tab** — did the workflow run and succeed?
+2. **S3 payload bucket** — did the event arrive? (`aws s3 ls s3://<bucket>/webhooks/<date>/<event_type>/`)
+3. **Handler CloudWatch logs** — did the Lambda execute?
+4. **DLQ** — did the handler crash?
+
 ## DLQ Investigation
 
 When the DLQ alarm fires:

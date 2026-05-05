@@ -16,6 +16,11 @@
       "type": "build"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "version": "3.777.0",
+      "type": "build"
+    },
+    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"

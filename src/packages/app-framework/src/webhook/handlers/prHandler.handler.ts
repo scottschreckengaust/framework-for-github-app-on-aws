@@ -14,7 +14,10 @@ interface EventDetail {
 }
 
 export const handler = async (event: EventDetail): Promise<void> => {
-  const isDuplicate = await isAlreadyProcessed(event.detail.delivery_id, 'prHandler');
+  const isDuplicate = await isAlreadyProcessed(
+    event.detail.delivery_id,
+    'prHandler',
+  );
   if (isDuplicate) return;
 
   publishEventProcessed({
