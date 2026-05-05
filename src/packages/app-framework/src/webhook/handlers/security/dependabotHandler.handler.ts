@@ -1,8 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import { executeActions } from './actions';
+import { executeActions, executeLifecycle } from './actions';
 import { Severity, resolveConfig, getActionsForSeverity } from './config';
 import { getInstallationToken } from './getInstallationToken';
-import { SecurityFinding } from './types';
+import { SecurityFinding, DismissalInfo } from './types';
 import { isAlreadyProcessed } from '../../utils/idempotency';
 import {
   publishEventProcessed,
@@ -19,11 +19,16 @@ interface DependabotEvent {
     installation?: { id: number };
     organization?: { login: string };
     repository: { full_name: string };
+    sender?: { login: string };
     payload: {
       alert: {
         number: number;
         state: string;
         html_url: string;
+        dismissed_by?: { login: string } | null;
+        dismissed_at?: string | null;
+        dismissed_reason?: string | null;
+        dismissed_comment?: string | null;
         dependency: {
           package: { ecosystem: string; name: string };
           manifest_path: string;
@@ -44,6 +49,10 @@ interface DependabotEvent {
 }
 
 const HANDLER_NAME = 'dependabotHandler';
+
+const ACTIVE_ACTIONS = ['created', 'reopened', 'reintroduced', 'auto_reopened'];
+const RESOLVE_ACTIONS = ['fixed', 'auto_dismissed'];
+const DISMISS_ACTIONS = ['dismissed'];
 
 function mapSeverity(depSeverity: string): Severity {
   switch (depSeverity.toLowerCase()) {
@@ -75,17 +84,6 @@ export const handler = async (event: DependabotEvent): Promise<void> => {
     handlerName: HANDLER_NAME,
   };
   publishEventProcessed(metricCtx);
-
-  if (detail.action !== 'created' && detail.action !== 'reopened') {
-    console.log(
-      JSON.stringify({
-        handler: HANDLER_NAME,
-        action: detail.action,
-        skipped: true,
-      }),
-    );
-    return;
-  }
 
   const token = await getInstallationToken();
   if (!token) {
@@ -119,23 +117,59 @@ export const handler = async (event: DependabotEvent): Promise<void> => {
     source: HANDLER_NAME,
   };
 
-  const config = await resolveConfig(octokit, owner, repo, 'dependabot');
-  const actions = getActionsForSeverity(config, finding.severity);
-
-  await executeActions(actions, {
-    octokit,
-    finding,
-    snsTopicArn: process.env.SECURITY_SNS_TOPIC_ARN,
-  });
-
-  console.log(
-    JSON.stringify({
-      handler: HANDLER_NAME,
-      deliveryId: detail.delivery_id,
-      alertNumber: alert.number,
-      package: alert.dependency.package.name,
-      severity: finding.severity,
-      actions,
-    }),
-  );
+  if (ACTIVE_ACTIONS.includes(detail.action)) {
+    const config = await resolveConfig(octokit, owner, repo, 'dependabot');
+    const actions = getActionsForSeverity(config, finding.severity);
+    await executeActions(actions, {
+      octokit,
+      finding,
+      snsTopicArn: process.env.SECURITY_SNS_TOPIC_ARN,
+    });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        package: alert.dependency.package.name,
+        severity: finding.severity,
+        actions,
+      }),
+    );
+  } else if (RESOLVE_ACTIONS.includes(detail.action)) {
+    await executeLifecycle('resolved', { octokit, finding });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        lifecycle: 'resolved',
+      }),
+    );
+  } else if (DISMISS_ACTIONS.includes(detail.action)) {
+    const dismissal: DismissalInfo = {
+      dismissedBy: alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
+      dismissedAt: alert.dismissed_at ?? new Date().toISOString(),
+      reason: alert.dismissed_reason ?? 'No reason provided',
+      comment: alert.dismissed_comment ?? undefined,
+    };
+    await executeLifecycle('dismissed', { octokit, finding, dismissal });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        lifecycle: 'dismissed',
+        dismissedBy: dismissal.dismissedBy,
+        reason: dismissal.reason,
+      }),
+    );
+  } else {
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        action: detail.action,
+        skipped: true,
+      }),
+    );
+  }
 };

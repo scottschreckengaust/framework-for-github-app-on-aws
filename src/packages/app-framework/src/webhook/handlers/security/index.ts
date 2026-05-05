@@ -1,4 +1,4 @@
-export { SecurityFinding } from './types';
+export { SecurityFinding, DismissalInfo, LifecycleAction } from './types';
 export {
   ActionType,
   Severity,
@@ -10,4 +10,4 @@ export {
   getActionsForSeverity,
   clearConfigCache,
 } from './config';
-export { executeActions, ActionContext } from './actions';
+export { executeActions, executeLifecycle, ActionContext, LifecycleContext } from './actions';

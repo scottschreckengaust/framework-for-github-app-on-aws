@@ -11,3 +11,12 @@ export interface SecurityFinding {
   alertNumber?: number;
   source: string;
 }
+
+export interface DismissalInfo {
+  dismissedBy: string;
+  dismissedAt: string;
+  reason: string;
+  comment?: string;
+}
+
+export type LifecycleAction = 'resolved' | 'dismissed' | 'appeared' | 'reopened';

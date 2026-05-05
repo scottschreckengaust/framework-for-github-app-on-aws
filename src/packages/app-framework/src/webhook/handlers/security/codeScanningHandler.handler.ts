@@ -1,8 +1,8 @@
 import { Octokit } from '@octokit/rest';
-import { executeActions } from './actions';
+import { executeActions, executeLifecycle } from './actions';
 import { Severity, resolveConfig, getActionsForSeverity } from './config';
 import { getInstallationToken } from './getInstallationToken';
-import { SecurityFinding } from './types';
+import { SecurityFinding, DismissalInfo } from './types';
 import { isAlreadyProcessed } from '../../utils/idempotency';
 import {
   publishEventProcessed,
@@ -19,11 +19,16 @@ interface CodeScanningEvent {
     installation?: { id: number };
     organization?: { login: string };
     repository: { full_name: string };
+    sender?: { login: string };
     payload: {
       alert: {
         number: number;
         state: string;
         html_url: string;
+        dismissed_by?: { login: string } | null;
+        dismissed_at?: string | null;
+        dismissed_reason?: string | null;
+        dismissed_comment?: string | null;
         most_recent_instance?: {
           ref?: string;
           commit_sha?: string;
@@ -45,6 +50,11 @@ interface CodeScanningEvent {
 }
 
 const HANDLER_NAME = 'codeScanningHandler';
+
+const ACTIVE_ACTIONS = ['created', 'reopened', 'reopened_by_user', 'reintroduced'];
+const RESOLVE_ACTIONS = ['fixed'];
+const DISMISS_ACTIONS = ['closed_by_user'];
+const APPEAR_ACTIONS = ['appeared_in_branch'];
 
 function mapSeverity(ruleSeverity: string): Severity {
   switch (ruleSeverity.toLowerCase()) {
@@ -80,17 +90,6 @@ export const handler = async (event: CodeScanningEvent): Promise<void> => {
   };
   publishEventProcessed(metricCtx);
 
-  if (detail.action !== 'created' && detail.action !== 'reopened') {
-    console.log(
-      JSON.stringify({
-        handler: HANDLER_NAME,
-        action: detail.action,
-        skipped: true,
-      }),
-    );
-    return;
-  }
-
   const token = await getInstallationToken();
   if (!token) {
     console.error('No installation token available', { handler: HANDLER_NAME });
@@ -121,24 +120,70 @@ export const handler = async (event: CodeScanningEvent): Promise<void> => {
     source: HANDLER_NAME,
   };
 
-  const config = await resolveConfig(octokit, owner, repo, 'code_scanning');
-  const actions = getActionsForSeverity(config, finding.severity);
-
-  await executeActions(actions, {
-    octokit,
-    finding,
-    snsTopicArn: process.env.SECURITY_SNS_TOPIC_ARN,
-  });
-
-  console.log(
-    JSON.stringify({
-      handler: HANDLER_NAME,
-      deliveryId: detail.delivery_id,
-      alertNumber: alert.number,
-      tool: alert.tool.name,
-      rule: alert.rule.id,
-      severity: finding.severity,
-      actions,
-    }),
-  );
+  if (ACTIVE_ACTIONS.includes(detail.action)) {
+    const config = await resolveConfig(octokit, owner, repo, 'code_scanning');
+    const actions = getActionsForSeverity(config, finding.severity);
+    await executeActions(actions, {
+      octokit,
+      finding,
+      snsTopicArn: process.env.SECURITY_SNS_TOPIC_ARN,
+    });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        tool: alert.tool.name,
+        rule: alert.rule.id,
+        severity: finding.severity,
+        actions,
+      }),
+    );
+  } else if (RESOLVE_ACTIONS.includes(detail.action)) {
+    await executeLifecycle('resolved', { octokit, finding });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        lifecycle: 'resolved',
+      }),
+    );
+  } else if (DISMISS_ACTIONS.includes(detail.action)) {
+    const dismissal: DismissalInfo = {
+      dismissedBy: alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
+      dismissedAt: alert.dismissed_at ?? new Date().toISOString(),
+      reason: alert.dismissed_reason ?? 'No reason provided',
+      comment: alert.dismissed_comment ?? undefined,
+    };
+    await executeLifecycle('dismissed', { octokit, finding, dismissal });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        lifecycle: 'dismissed',
+        dismissedBy: dismissal.dismissedBy,
+        reason: dismissal.reason,
+      }),
+    );
+  } else if (APPEAR_ACTIONS.includes(detail.action)) {
+    await executeLifecycle('appeared', { octokit, finding });
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        deliveryId: detail.delivery_id,
+        alertNumber: alert.number,
+        lifecycle: 'appeared',
+      }),
+    );
+  } else {
+    console.log(
+      JSON.stringify({
+        handler: HANDLER_NAME,
+        action: detail.action,
+        skipped: true,
+      }),
+    );
+  }
 };
