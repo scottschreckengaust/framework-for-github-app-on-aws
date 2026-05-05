@@ -1,14 +1,9 @@
-# Dependencies
 node_modules/
-
-# Build output
 dist/
-
-# Generated content (copied from repo root by prebuild script)
+.astro/
 src/content/docs/runbooks/
 src/content/docs/adr/
 src/content/docs/quick-start.md
 src/content/docs/deployment-plan.md
-
-# Astro
-.astro/
+playwright-report/
+test-results/

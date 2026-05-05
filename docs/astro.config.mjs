@@ -41,7 +41,7 @@ export default defineConfig({
       ],
       editLink: {
         baseUrl:
-          'https://github.com/scottschreckengaust/framework-for-github-app-on-aws/edit/main/docs-site/',
+          'https://github.com/scottschreckengaust/framework-for-github-app-on-aws/edit/main/docs/',
       },
       lastUpdated: true,
     }),
