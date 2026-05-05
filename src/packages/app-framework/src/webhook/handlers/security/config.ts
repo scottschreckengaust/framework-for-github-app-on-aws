@@ -17,6 +17,15 @@ export interface SecurityHandlerConfig {
   security_advisory?: SeverityActions;
 }
 
+const VALID_ACTIONS: ActionType[] = [
+  'block',
+  'issue',
+  'comment',
+  'notify',
+  'annotate',
+  'ignore',
+];
+
 const APP_DEFAULTS: Required<SecurityHandlerConfig> = {
   code_scanning: {
     critical: ['block', 'issue', 'notify'],
@@ -53,12 +62,41 @@ const CONFIG_FILE_PATH = '.github/ai3-mvp.json';
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, CacheEntry>();
 
-function parseActionExpression(expr: string): ActionType[] {
-  return expr
-    .split('+')
-    .filter((a): a is ActionType =>
-      ['block', 'issue', 'comment', 'notify', 'annotate', 'ignore'].includes(a),
+/**
+ * Resolve conflicting actions according to precedence rules:
+ * 1. ignore present → discard everything else
+ * 2. block present → discard annotate (block is a superset)
+ * 3. deduplicate
+ */
+export function resolveConflicts(actions: ActionType[]): ActionType[] {
+  if (actions.includes('ignore')) {
+    if (actions.length > 1) {
+      console.warn(
+        'ignore cannot be combined with other actions, treating as ignore',
+      );
+    }
+    return ['ignore'];
+  }
+
+  let resolved = [...new Set(actions)];
+
+  if (resolved.includes('block') && resolved.includes('annotate')) {
+    console.warn(
+      'block supersedes annotate (both create Check Run), removing annotate',
     );
+    resolved = resolved.filter((a) => a !== 'annotate');
+  }
+
+  return resolved;
+}
+
+function parseActionList(raw: unknown): ActionType[] | null {
+  if (!Array.isArray(raw)) return null;
+  const valid = raw.filter(
+    (a): a is ActionType => typeof a === 'string' && VALID_ACTIONS.includes(a as ActionType),
+  );
+  if (valid.length === 0) return null;
+  return resolveConflicts(valid);
 }
 
 function parseRepoConfig(raw: unknown): SecurityHandlerConfig | null {
@@ -81,8 +119,9 @@ function parseRepoConfig(raw: unknown): SecurityHandlerConfig | null {
     const severityMap = handlerConfig as Record<string, unknown>;
     const parsed: SeverityActions = {};
     for (const sev of ['critical', 'high', 'medium', 'low'] as const) {
-      if (typeof severityMap[sev] === 'string') {
-        parsed[sev] = parseActionExpression(severityMap[sev] as string);
+      const actions = parseActionList(severityMap[sev]);
+      if (actions) {
+        parsed[sev] = actions;
       }
     }
     result[handler] = parsed;

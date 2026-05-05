@@ -15,21 +15,35 @@
     }
   },
   "$defs": {
-    "actionExpression": {
-      "type": "string",
-      "pattern": "^(block|issue|comment|notify|annotate|ignore)(\\+(block|issue|comment|notify|annotate|ignore))*$",
-      "description": "One or more actions joined by '+'. Available: block, issue, comment, notify, annotate, ignore. Example: 'block+issue+notify'"
+    "actionList": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": { "const": "ignore" },
+          "minItems": 1,
+          "maxItems": 1,
+          "description": "Explicitly suppress all actions for this severity. Must be the only element."
+        },
+        {
+          "type": "array",
+          "items": { "enum": ["block", "issue", "comment", "notify", "annotate"] },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "One or more actions to execute. Precedence rules: 'block' supersedes 'annotate' (both create a Check Run; block's failure conclusion wins)."
+        }
+      ],
+      "description": "Action list for a severity level. Either [\"ignore\"] alone, or one or more of: block, issue, comment, notify, annotate."
     },
     "severityActions": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "critical": { "$ref": "#/$defs/actionExpression" },
-        "high": { "$ref": "#/$defs/actionExpression" },
-        "medium": { "$ref": "#/$defs/actionExpression" },
-        "low": { "$ref": "#/$defs/actionExpression" }
+        "critical": { "$ref": "#/$defs/actionList" },
+        "high": { "$ref": "#/$defs/actionList" },
+        "medium": { "$ref": "#/$defs/actionList" },
+        "low": { "$ref": "#/$defs/actionList" }
       },
-      "description": "Map severity levels to action expressions. Unspecified severities inherit from org or app defaults."
+      "description": "Map severity levels to action lists. Unspecified severities inherit from org or app defaults."
     },
     "securityConfig": {
       "type": "object",

@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { ActionType } from './config';
+import { ActionType, resolveConflicts } from './config';
 import { SecurityFinding } from './types';
 
 export interface ActionContext {
@@ -139,7 +139,8 @@ export async function executeActions(
   actions: ActionType[],
   ctx: ActionContext,
 ): Promise<void> {
-  for (const action of actions) {
+  const resolved = resolveConflicts(actions);
+  for (const action of resolved) {
     try {
       await ACTION_EXECUTORS[action](ctx);
     } catch (err) {

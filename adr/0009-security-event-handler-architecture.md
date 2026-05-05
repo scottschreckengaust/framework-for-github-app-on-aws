@@ -46,16 +46,24 @@ Actions are composable via `+` delimiter in config:
 | `annotate` | Create a Check Run annotation (inline code marker) |
 | `ignore` | Log metric only, take no action |
 
-Example config value: `"critical": "block+issue+notify"` executes all three.
+Actions are specified as JSON arrays. Example: `"critical": ["block", "issue", "notify"]`
+
+### Action Precedence Rules
+
+Conflicts are resolved deterministically at runtime:
+
+1. **`ignore` present** → discard all other actions, result is `["ignore"]`. Schema enforces `ignore` must be the sole element; runtime also enforces this as a safety net.
+2. **`block` + `annotate` both present** → remove `annotate`. Both create a Check Run named `ai3-mvp/security`; `block` sets conclusion `failure`, `annotate` sets `neutral`. Last-write-wins on same-named Check Runs means `annotate` after `block` would silently unblock merges. `block` is a strict superset (includes output/summary).
+3. **Duplicates** → deduplicated automatically.
 
 ### Default Severity-to-Action Mapping
 
 | Severity | Default Actions |
 |----------|----------------|
-| `critical` | `block+issue+notify` |
-| `high` | `comment+issue` |
-| `medium` | `annotate` |
-| `low` | `ignore` |
+| `critical` | `["block", "issue", "notify"]` |
+| `high` | `["comment", "issue"]` |
+| `medium` | `["annotate"]` |
+| `low` | `["ignore"]` |
 
 ### Per-Repo Config (`.github/ai3-mvp.json`)
 
@@ -66,13 +74,15 @@ Repos can override defaults via a JSON file validated against a published JSON S
   "$schema": "https://raw.githubusercontent.com/scottschreckengaust/framework-for-github-app-on-aws/main/schemas/ai3-mvp-config.schema.json",
   "security": {
     "code_scanning": {
-      "critical": "block+issue+notify",
-      "high": "comment",
-      "medium": "ignore"
+      "critical": ["block", "issue", "notify"],
+      "high": ["comment"],
+      "medium": ["ignore"]
     }
   }
 }
 ```
+
+Schema validation (via `oneOf`) rejects `["ignore", "issue"]` at edit time. Runtime `resolveConflicts()` handles any edge cases that bypass schema validation.
 
 ### Config Resolution Order
 
@@ -100,6 +110,9 @@ Rejected. Security events are system-generated (no user in the loop). Installati
 
 ### YAML config instead of JSON
 Rejected. JSON has native schema validation (JSON Schema + `$schema` for IDE support), no parser ambiguity (YAML's Norway problem), and aligns with TypeScript's JSON.parse at runtime.
+
+### String-based action expressions (`"block+issue+notify"`)
+Initially implemented, then replaced with JSON arrays. The `+`-joined string format prevented per-element schema validation, couldn't enforce `uniqueItems`, and gave opaque regex errors. JSON arrays with `oneOf` provide precise validation and catch `ignore`-combination errors at edit time.
 
 ### Hardcoded actions per handler (no config)
 Rejected as the final state. We ship with sensible hardcoded defaults but design the interface to accept external config from day one. The config resolution layer slots in without handler changes.

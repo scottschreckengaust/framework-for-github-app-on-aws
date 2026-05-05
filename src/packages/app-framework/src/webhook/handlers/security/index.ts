@@ -6,6 +6,7 @@ export {
   SecurityHandlerConfig,
   ResolvedConfig,
   resolveConfig,
+  resolveConflicts,
   getActionsForSeverity,
   clearConfigCache,
 } from './config';
