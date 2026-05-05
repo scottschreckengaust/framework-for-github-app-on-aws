@@ -1,59 +1,50 @@
-# Contributing Guidelines
+# Contributing to ai3-mvp
 
-Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional
-documentation, we greatly value feedback and contributions from our community.
+## Quick Links
 
-Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
-information to effectively respond to your bug report or contribution.
+- [QUICK_START.md](QUICK_START.md) — Deploy guide
+- [AGENTS.md](AGENTS.md) — Agent workflow conventions
+- [ADRs](adr/) — Architecture decisions
 
+## Development Workflow
 
-## Reporting Bugs/Feature Requests
+1. Create a branch from `main` (use prefix: `issues/<number>`, `fix/<description>`, `feat/<description>`)
+2. Make changes following conventions in [AGENTS.md](AGENTS.md)
+3. Ensure `npx projen build` passes
+4. Open a PR using the appropriate [template](.github/PULL_REQUEST_TEMPLATE/)
+5. Deploy and E2E test before requesting review
+6. All bot commands must still respond after deploy
 
-We welcome you to use the GitHub issue tracker to report bugs or suggest features.
+## PR Templates
 
-When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
-reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
+Use the URL query param to select a template:
+- Feature: `?template=feature.md`
+- Bug fix: `?template=bugfix.md`
+- Documentation: `?template=docs.md`
+- Disaster Recovery: `?template=disaster-recovery-testing.md`
 
-* A reproducible test case or series of steps
-* The version of our code being used
-* Any modifications you've made relevant to the bug
-* Anything unusual about your environment or deployment
+---
 
+## Reporting Bugs / Feature Requests
 
-## Contributing via Pull Requests
-Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+Use the [issue templates](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/issues/new/choose). Check existing issues first to avoid duplicates. Include reproduction steps, environment details, and expected vs actual behavior.
 
-1. You are working against the latest source on the *main* branch.
-2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
+## Finding Work
 
-To send us a pull request, please:
+Look for issues labeled `help wanted`. Issues are prioritized P0/P1/P2 with effort estimates in the body.
 
-1. Fork the repository.
-2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
-3. Ensure local tests pass.
-4. Commit to your fork using clear commit messages.
-5. Send us a pull request, answering any default questions in the pull request interface.
-6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+## Large Changes
 
-GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
-[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
-
-
-## Finding contributions to work on
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any 'help wanted' issues is a great place to start.
-
+Open an issue for discussion before submitting PRs that add new constructs, change APIs, or modify architecture. This avoids wasted effort.
 
 ## Code of Conduct
-This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
-For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
-opensource-codeofconduct@amazon.com with any additional questions or comments.
 
+By participating in this project, you agree to abide by the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Security issue notifications
-If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
+## Security Issues
 
+If you discover a potential security issue, do **not** create a public GitHub issue. See [SECURITY.md](SECURITY.md) for reporting instructions.
 
-## Licensing
+## License
 
-See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
+This project is [Apache-2.0](LICENSE) licensed.
