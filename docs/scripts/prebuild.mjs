@@ -43,8 +43,45 @@ function addFrontmatter(content, title) {
   return `---\ntitle: ${escapeYamlString(title)}\n---\n\n${content}`;
 }
 
-function copyWithFrontmatter(srcPath, destPath, fallbackTitle) {
-  const content = readFileSync(srcPath, 'utf-8');
+const BASE_PATH = '/framework-for-github-app-on-aws';
+const GITHUB_REPO = 'https://github.com/scottschreckengaust/framework-for-github-app-on-aws';
+
+/**
+ * Rewrites relative markdown links to work within the Starlight docs site.
+ * Links to pages that exist in the docs site get absolute site paths.
+ * Links to files not in the docs site get GitHub repo URLs.
+ */
+function rewriteLinks(content, srcRelDir) {
+  // Map of relative paths (from repo root context) to docs site paths
+  const sitePathMap = {
+    'adr/': `${BASE_PATH}/adr/0001-ai3-mvp-webhook-oauth-orchestration/`,
+    'docs/DEPLOYMENT_PLAN_REFERENCE.md': `${BASE_PATH}/deployment-plan/`,
+    'docs/runbooks/': `${BASE_PATH}/runbooks/monitoring/`,
+  };
+
+  let result = content;
+
+  // Rewrite known site paths
+  for (const [relPath, sitePath] of Object.entries(sitePathMap)) {
+    result = result.replaceAll(`](${relPath})`, `](${sitePath})`);
+  }
+
+  // Rewrite relative paths that point outside the docs site to GitHub URLs
+  // Pattern: links starting with ../ that point to non-doc files
+  result = result.replace(
+    /\]\((\.\.\/)+((?!#)[^)]+)\)/g,
+    (match, _dots, path) => {
+      // Resolve the relative path from the source file's perspective
+      return `](${GITHUB_REPO}/blob/main/${path})`;
+    }
+  );
+
+  return result;
+}
+
+function copyWithFrontmatter(srcPath, destPath, fallbackTitle, srcRelDir) {
+  let content = readFileSync(srcPath, 'utf-8');
+  content = rewriteLinks(content, srcRelDir || '');
   const title = extractTitle(content) || fallbackTitle;
   const processed = addFrontmatter(content, title);
   ensureDir(dirname(destPath));
@@ -64,7 +101,8 @@ for (const file of runbooks) {
   copyWithFrontmatter(
     join(ROOT, 'docs', 'runbooks', file),
     join(CONTENT_DIR, 'runbooks', file),
-    file.replace(/\.md$/, '').replace(/-/g, ' ')
+    file.replace(/\.md$/, '').replace(/-/g, ' '),
+    'docs/runbooks'
   );
 }
 
@@ -76,7 +114,8 @@ for (const file of adrFiles) {
   copyWithFrontmatter(
     join(adrDir, file),
     join(CONTENT_DIR, 'adr', file),
-    file.replace(/\.md$/, '').replace(/-/g, ' ')
+    file.replace(/\.md$/, '').replace(/-/g, ' '),
+    'adr'
   );
 }
 
@@ -85,7 +124,8 @@ console.log('Copying Quick Start...');
 copyWithFrontmatter(
   join(ROOT, 'QUICK_START.md'),
   join(CONTENT_DIR, 'quick-start.md'),
-  'Quick Start'
+  'Quick Start',
+  ''
 );
 
 // --- Copy DEPLOYMENT_PLAN_REFERENCE.md ---
@@ -93,7 +133,8 @@ console.log('Copying Deployment Plan...');
 copyWithFrontmatter(
   join(ROOT, 'docs', 'DEPLOYMENT_PLAN_REFERENCE.md'),
   join(CONTENT_DIR, 'deployment-plan.md'),
-  'Deployment Plan Reference'
+  'Deployment Plan Reference',
+  'docs'
 );
 
 console.log('Done!');
