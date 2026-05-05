@@ -32,26 +32,36 @@ async function executeBlock(ctx: ActionContext): Promise<void> {
   });
 }
 
+function issueLabels(finding: SecurityFinding): string[] {
+  const labels = ['security'];
+  if (finding.tool) labels.push(finding.tool);
+  return labels;
+}
+
+function issueLabelsCSV(finding: SecurityFinding): string {
+  return issueLabels(finding).join(',');
+}
+
 async function executeIssue(ctx: ActionContext): Promise<void> {
   const { octokit, finding } = ctx;
   const issueTitle = `[Security] ${finding.title}`;
+  const labels = issueLabelsCSV(finding);
 
   const openIssues = await octokit.issues.listForRepo({
     owner: finding.repo.owner,
     repo: finding.repo.name,
     state: 'open',
-    labels: `security,${finding.source}`,
+    labels,
     per_page: 100,
   });
 
   if (openIssues.data.find((i) => i.title === issueTitle)) return;
 
-  // Check for a closed issue to reopen (handles reopened/reintroduced alerts)
   const closedIssues = await octokit.issues.listForRepo({
     owner: finding.repo.owner,
     repo: finding.repo.name,
     state: 'closed',
-    labels: `security,${finding.source}`,
+    labels,
     per_page: 100,
   });
 
@@ -89,7 +99,7 @@ async function executeIssue(ctx: ActionContext): Promise<void> {
       '',
       finding.body,
     ].join('\n'),
-    labels: ['security', finding.source],
+    labels: issueLabels(finding),
   });
 }
 
@@ -202,7 +212,7 @@ async function closeTrackingIssue(
     owner: finding.repo.owner,
     repo: finding.repo.name,
     state: 'open',
-    labels: `security,${finding.source}`,
+    labels: issueLabelsCSV(finding),
     per_page: 100,
   });
 
@@ -259,16 +269,15 @@ export async function executeLifecycle(
       }
       case 'dismissed': {
         const d = ctx.dismissal;
-        const comment = [
+        const parts = [
           `:no_entry_sign: **Dismissed** by @${d?.dismissedBy ?? 'unknown'}`,
           `**Reason:** ${d?.reason ?? 'No reason provided'}`,
-          d?.comment ? `\n---\n${d.comment}` : '',
-          '',
-          `[View alert](${ctx.finding.htmlUrl})`,
-        ]
-          .filter(Boolean)
-          .join('\n');
-        await closeTrackingIssue(ctx, comment);
+        ];
+        if (d?.comment) {
+          parts.push('', '**Comment**', '---', d.comment);
+        }
+        parts.push('', `[View alert](${ctx.finding.htmlUrl})`);
+        await closeTrackingIssue(ctx, parts.join('\n'));
         await unblockCheckRun(ctx);
         break;
       }
