@@ -7,10 +7,8 @@ export const handler = async (event: {
   checkRunId?: number;
   jobId: string;
 }): Promise<{ checkRunId: number; jobId: string }> => {
-  // Get installation token for GitHub API calls (not user token)
-  // The check run is created by the app, not the user
-  const token = await getInstallationToken();
-  if (!token) throw new Error('Failed to get installation token');
+  const token = await getToken(event.userId);
+  if (!token) throw new Error('No token available (user or installation)');
 
   if (event.action === 'create') {
     const resp = await fetch(
@@ -72,6 +70,66 @@ export const handler = async (event: {
 
   throw new Error(`Unknown action: ${event.action}`);
 };
+
+async function getToken(userId?: number): Promise<string | null> {
+  // Try user token first
+  if (userId) {
+    const userToken = await getUserToken(userId);
+    if (userToken) {
+      console.log('Using user token', { userId });
+      return userToken;
+    }
+    console.log('User token unavailable, falling back to installation token', { userId });
+  }
+  // Fallback to installation token
+  return getInstallationToken();
+}
+
+async function getUserToken(userId: number): Promise<string | null> {
+  const tableName = process.env.USER_TOKENS_TABLE_NAME;
+  const keyArn = process.env.TOKEN_ENCRYPTION_KEY_ARN;
+  if (!tableName) return null;
+
+  try {
+    /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
+    const { DynamoDBClient, GetItemCommand } = await import('@aws-sdk/client-dynamodb');
+    /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+    const ddb = new DynamoDBClient({});
+    const resp = await ddb.send(new GetItemCommand({
+      TableName: tableName,
+      Key: { GitHubUserId: { N: String(userId) } },
+    }));
+    if (!resp.Item) return null;
+
+    const encryptedToken = resp.Item.EncryptedAccessToken?.S;
+    const tokenExpiry = resp.Item.TokenExpiry?.S;
+    if (!encryptedToken || !tokenExpiry) return null;
+
+    // Check if expired
+    if (new Date(tokenExpiry).getTime() < Date.now()) {
+      console.log('User token expired', { userId, expiry: tokenExpiry });
+      return null;
+    }
+
+    // Decrypt
+    if (keyArn) {
+      /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
+      const { KMSClient, DecryptCommand } = await import('@aws-sdk/client-kms');
+      /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+      const kms = new KMSClient({});
+      const decResp = await kms.send(new DecryptCommand({
+        CiphertextBlob: Buffer.from(encryptedToken, 'base64'),
+      }));
+      return Buffer.from(decResp.Plaintext!).toString('utf8');
+    }
+
+    // No KMS key configured, token may be plaintext
+    return encryptedToken;
+  } catch (e) {
+    console.error('Failed to get user token', { userId, error: e });
+    return null;
+  }
+}
 
 async function getInstallationToken(): Promise<string | null> {
   const functionName = process.env.INSTALLATION_TOKEN_FUNCTION_NAME;
