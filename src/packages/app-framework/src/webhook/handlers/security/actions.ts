@@ -42,45 +42,6 @@ function issueLabelsCSV(finding: SecurityFinding): string {
   return issueLabels(finding).join(',');
 }
 
-async function linkRelatedIssues(
-  octokit: Octokit,
-  finding: SecurityFinding,
-  issueNumber: number,
-  issueNodeId: string,
-  body: string,
-): Promise<void> {
-  const labels = issueLabelsCSV(finding);
-  const allIssues = await octokit.issues.listForRepo({
-    owner: finding.repo.owner,
-    repo: finding.repo.name,
-    state: 'all',
-    labels,
-    per_page: 100,
-  });
-
-  const related = allIssues.data.filter(
-    (i) => i.number !== issueNumber && i.title.startsWith('[Security]'),
-  );
-  if (related.length === 0) return;
-
-  const tasklistItems = related.map((i) => `- [ ] #${i.number}`);
-  const updatedBody = [
-    body,
-    '',
-    '### Related Issues',
-    ...tasklistItems,
-  ].join('\n');
-
-  await octokit.graphql(
-    `mutation($id: ID!, $body: String!) {
-      updateIssue(input: { id: $id, body: $body }) {
-        issue { id }
-      }
-    }`,
-    { id: issueNodeId, body: updatedBody },
-  );
-}
-
 async function executeIssue(ctx: ActionContext): Promise<void> {
   const { octokit, finding } = ctx;
   const issueTitle = `[Security] ${finding.title}`;
@@ -127,29 +88,19 @@ async function executeIssue(ctx: ActionContext): Promise<void> {
     return;
   }
 
-  const issueBody = [
-    `**Severity:** ${finding.severity}`,
-    `**Tool:** ${finding.tool ?? 'Unknown'}`,
-    `**Alert:** ${finding.htmlUrl}`,
-    '',
-    finding.body,
-  ].join('\n');
-
-  const created = await octokit.issues.create({
+  await octokit.issues.create({
     owner: finding.repo.owner,
     repo: finding.repo.name,
     title: issueTitle,
-    body: issueBody,
+    body: [
+      `**Severity:** ${finding.severity}`,
+      `**Tool:** ${finding.tool ?? 'Unknown'}`,
+      `**Alert:** ${finding.htmlUrl}`,
+      '',
+      finding.body,
+    ].join('\n'),
     labels: issueLabels(finding),
   });
-
-  await linkRelatedIssues(
-    octokit,
-    finding,
-    created.data.number,
-    created.data.node_id,
-    issueBody,
-  );
 }
 
 async function executeComment(ctx: ActionContext): Promise<void> {
