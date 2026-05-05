@@ -2,7 +2,7 @@
 
 ## Project Leadership
 
-This project is maintained by [Scott Schreckengaust](https://github.com/scottschreckengaust) (BDFL).
+This project is maintained by [Scott Schreckengaust](https://github.com/scottschreckengaust) (BDFL — Benevolent Dictator For Life).
 
 All final decisions on direction, architecture, and releases rest with the maintainer.
 
