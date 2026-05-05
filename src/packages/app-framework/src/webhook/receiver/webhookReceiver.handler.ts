@@ -133,7 +133,16 @@ export const handler = async (
     process.env[WebhookEnvironmentVariables.PAYLOAD_BUCKET_NAME];
   if (!bucketName) throw new Error('PAYLOAD_BUCKET_NAME not set');
 
-  const payload = JSON.parse(body);
+  let payload: Record<string, unknown>;
+  try {
+    payload = JSON.parse(body);
+  } catch {
+    return {
+      statusCode: 400,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'error', reason: 'invalid_json', deliveryId }),
+    };
+  }
 
   const s3Ref = await storePayloadInS3(bucketName, deliveryId, eventType, body);
 

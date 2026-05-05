@@ -142,6 +142,7 @@ async function getInstallationToken(): Promise<string | null> {
     const { LambdaClient, InvokeCommand } = await import('@aws-sdk/client-lambda');
     /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
+    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
     const event = {
       version: '2.0',
       routeKey: 'POST /tokens/installation',
@@ -149,10 +150,16 @@ async function getInstallationToken(): Promise<string | null> {
       headers: { 'content-type': 'application/json' },
       requestContext: {
         http: { method: 'POST', path: '/tokens/installation' },
-        accountId: process.env.AWS_ACCOUNT_ID || '000000000000',
+        accountId,
         stage: '$default',
-        requestId: 'step-function-check',
-        authorizer: { iam: { accessKey: 'internal', accountId: process.env.AWS_ACCOUNT_ID || '000000000000', userArn: 'internal' } },
+        requestId: 'internal',
+        authorizer: {
+          iam: {
+            accessKey: 'internal',
+            accountId,
+            userArn: process.env.AWS_LAMBDA_FUNCTION_ARN || 'unknown',
+          },
+        },
       },
       body: JSON.stringify({ appId: Number(appId), nodeId }),
       isBase64Encoded: false,

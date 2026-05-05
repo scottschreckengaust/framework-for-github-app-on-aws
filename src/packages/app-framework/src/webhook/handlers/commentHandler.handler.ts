@@ -40,6 +40,7 @@ async function getInstallationToken(): Promise<string | null> {
     );
     /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
+    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
     const event = {
       version: '2.0',
       routeKey: 'POST /tokens/installation',
@@ -47,14 +48,14 @@ async function getInstallationToken(): Promise<string | null> {
       headers: { 'content-type': 'application/json' },
       requestContext: {
         http: { method: 'POST', path: '/tokens/installation' },
-        accountId: '361116840407',
+        accountId,
         stage: '$default',
         requestId: 'internal',
         authorizer: {
           iam: {
             accessKey: 'internal',
-            accountId: '361116840407',
-            userArn: 'internal',
+            accountId,
+            userArn: process.env.AWS_LAMBDA_FUNCTION_ARN || 'unknown',
           },
         },
       },
@@ -70,7 +71,7 @@ async function getInstallationToken(): Promise<string | null> {
     );
     const respPayload = JSON.parse(new TextDecoder().decode(resp.Payload));
     if (respPayload.statusCode !== 200) {
-      console.error('Installation token error', respPayload);
+      console.error('Installation token error', { statusCode: respPayload?.statusCode });
       return null;
     }
     const body = JSON.parse(respPayload.body);
