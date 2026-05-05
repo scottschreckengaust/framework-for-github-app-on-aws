@@ -98,6 +98,9 @@ async function executeIssue(ctx: ActionContext): Promise<void> {
       `**Alert:** ${finding.htmlUrl}`,
       '',
       finding.body,
+      '',
+      '### Tracked Alerts',
+      `- [ ] ${finding.htmlUrl}`,
     ].join('\n'),
     labels: issueLabels(finding),
   });
