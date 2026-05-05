@@ -1,13 +1,17 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readdirSync, statSync } from 'fs';
+import { dirname, resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-const DIST_DIR = `${__dirname}/../dist`;
+const __filename = fileURLToPath(import.meta.url);
+const __dir = dirname(__filename);
+const DIST_DIR = resolve(__dir, '..', 'dist');
 
 function getAllPages(dir: string, base: string): string[] {
   const pages: string[] = [];
   for (const entry of readdirSync(dir)) {
-    if (entry.includes('..')) continue;
+    if (entry.startsWith('.')) continue;
     const full = `${dir}/${entry}`;
     if (statSync(full).isDirectory()) {
       pages.push(...getAllPages(full, `${base}/${entry}`));
