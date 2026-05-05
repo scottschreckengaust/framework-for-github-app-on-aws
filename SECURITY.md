@@ -5,14 +5,12 @@
 If you discover a security vulnerability, please report it privately:
 
 1. **Do NOT** open a public GitHub issue
-2. Use [GitHub Security Advisories](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/security/advisories/new) to report privately
+2. Email the maintainer directly or open a private issue (contact info in CODEOWNERS)
 3. Include: description, reproduction steps, impact assessment, and suggested fix if possible
 
-## Response Timeline
+## Response
 
-- **Acknowledgment:** Within 48 hours
-- **Initial assessment:** Within 1 week
-- **Fix timeline:** Based on severity (P0: immediate, P1: 1 week, P2: next sprint)
+This is a maintainer-supported project. Responses are best-effort — there are no guaranteed SLAs. Critical issues (credential leaks, RCE) will be prioritized.
 
 ## Supported Versions
 
