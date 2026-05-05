@@ -23,5 +23,5 @@ assignees: ''
 - [ ] 
 
 ## Priority / Effort Estimate
-- Priority: P0 / P1 / P2 / P3
+- Priority: P0 / P1 / P2
 - Effort: Low / Medium / High

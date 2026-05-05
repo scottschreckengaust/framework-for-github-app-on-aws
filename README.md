@@ -34,7 +34,7 @@ which seek to simplify and standardize these manual tasks.
 
 See the readme for each component for more information on how to get started with each.
 
-- [Credential Manager](https://github.com/amazon-ospo/framework-for-github-app-on-aws/blob/main/src/packages/app-framework/README.md):
+- [Credential Manager](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/blob/main/src/packages/app-framework/README.md):
   This component keeps track of installations for one or more GitHub Apps
   and provides APIs that you can use
   to obtain GitHub credentials
@@ -44,7 +44,7 @@ See the readme for each component for more information on how to get started wit
   such as CloudWatch-based monitoring of
   [GitHub API rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28)
   for each managed GitHub App installation.
-- [Operator Tools](https://github.com/amazon-ospo/framework-for-github-app-on-aws/blob/main/src/packages/app-framework-ops-tools/README.md):
+- [Operator Tools](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/blob/main/src/packages/app-framework-ops-tools/README.md):
   Some operations,
   such as importing
   [GitHub App JWT signing keys](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps),
@@ -57,22 +57,22 @@ See the readme for each component for more information on how to get started wit
 
 Do you have questions or need help?
 The best way to interact with our maintainers is through
-[GitHub issues](https://github.com/amazon-ospo/framework-for-github-app-on-aws/issues/new/choose).
+[GitHub issues](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/issues/new/choose).
 
 ## Security Issues
 
 Please do not report security issues through GitHub issues.
-See our [security policy](https://github.com/amazon-ospo/framework-for-github-app-on-aws?tab=security-ov-file)
+See our [security policy](https://github.com/scottschreckengaust/framework-for-github-app-on-aws?tab=security-ov-file)
 for instructions on how to report security issues.
 
 ## Contributing
 
 Do you want to help develop this framework?
 See our
-[contributing guidelines](https://github.com/amazon-ospo/framework-for-github-app-on-aws/blob/main/CONTRIBUTING.md)
+[contributing guidelines](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/blob/main/CONTRIBUTING.md)
 for how to get started.
 
 ## License
 
 This project is licensed under the
-[Apache-2.0 License](https://github.com/amazon-ospo/framework-for-github-app-on-aws/blob/main/LICENSE).
+[Apache-2.0 License](https://github.com/scottschreckengaust/framework-for-github-app-on-aws/blob/main/LICENSE).
