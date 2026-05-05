@@ -15,6 +15,7 @@ export const handler = async (): Promise<void> => {
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { LambdaClient, InvokeCommand } = await import('@aws-sdk/client-lambda');
     const lambda = new LambdaClient({});
+    const accountId = (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';
 
     const event = {
       version: '2.0',
@@ -23,10 +24,16 @@ export const handler = async (): Promise<void> => {
       headers: { 'content-type': 'application/json' },
       requestContext: {
         http: { method: 'POST', path: '/tokens/app' },
-        accountId: '361116840407',
+        accountId,
         stage: '$default',
         requestId: 'health-check',
-        authorizer: { iam: { accessKey: 'internal', accountId: '361116840407', userArn: 'internal' } },
+        authorizer: {
+          iam: {
+            accessKey: 'internal',
+            accountId,
+            userArn: process.env.AWS_LAMBDA_FUNCTION_ARN || 'unknown',
+          },
+        },
       },
       body: JSON.stringify({ appId: Number(appId) }),
       isBase64Encoded: false,
