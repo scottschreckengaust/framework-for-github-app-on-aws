@@ -4,6 +4,8 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { LAMBDA_DEFAULTS } from '../../../lambdaDefaults';
 
+const SRC_DIR = __dirname.replace(/[/\\]lib[/\\]/, '/src/');
+
 export interface SecurityHandlersProps {
   readonly appId: string;
   readonly nodeId: string;
@@ -41,6 +43,7 @@ export class SecurityHandlers extends Construct {
       'secretScanningHandler',
       {
         ...LAMBDA_DEFAULTS,
+        entry: `${SRC_DIR}/secretScanningHandler.handler.ts`,
         description: 'Handles secret_scanning_alert events',
         memorySize: 256,
         timeout: Duration.seconds(30),
@@ -51,6 +54,7 @@ export class SecurityHandlers extends Construct {
 
     this.codeScanningHandler = new NodejsFunction(this, 'codeScanningHandler', {
       ...LAMBDA_DEFAULTS,
+      entry: `${SRC_DIR}/codeScanningHandler.handler.ts`,
       description: 'Handles code_scanning_alert events',
       memorySize: 256,
       timeout: Duration.seconds(30),
@@ -60,6 +64,7 @@ export class SecurityHandlers extends Construct {
 
     this.dependabotHandler = new NodejsFunction(this, 'dependabotHandler', {
       ...LAMBDA_DEFAULTS,
+      entry: `${SRC_DIR}/dependabotHandler.handler.ts`,
       description: 'Handles dependabot_alert events',
       memorySize: 256,
       timeout: Duration.seconds(30),
@@ -72,6 +77,7 @@ export class SecurityHandlers extends Construct {
       'securityAdvisoryHandler',
       {
         ...LAMBDA_DEFAULTS,
+        entry: `${SRC_DIR}/securityAdvisoryHandler.handler.ts`,
         description: 'Handles security_advisory events (informational)',
         memorySize: 256,
         timeout: Duration.seconds(30),
