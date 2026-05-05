@@ -93,4 +93,51 @@ program
       process.exit(1);
     }
   });
+// subcommand - update-webhook-config
+program
+  .command('update-webhook-config')
+  .description('Update GitHub App webhook URL/secret and app URLs via JWT authentication')
+  .requiredOption('--app-id <appId>', 'GitHub App ID')
+  .requiredOption('--webhook-url <url>', 'New webhook URL')
+  .requiredOption('--webhook-secret-arn <arn>', 'Secrets Manager ARN for the webhook secret')
+  .option('--callback-url <url>', 'OAuth callback URL')
+  .option('--homepage-url <url>', 'App homepage URL')
+  .option('--setup-url <url>', 'App setup URL')
+  .option('--table-name <tableName>', 'DynamoDB Apps table name (for KMS key lookup)')
+  .option('--kms-key-arn <keyArn>', 'KMS key ARN (skips table lookup if provided)')
+  .addHelpText(
+    'after',
+    `
+    Example:
+      $ app-framework-for-github-apps-on-aws-ops-tools update-webhook-config \\
+          --app-id 123456 \\
+          --webhook-url https://example.com/webhook \\
+          --webhook-secret-arn arn:aws:secretsmanager:us-east-1:123456789:secret:my-secret \\
+          --table-name my-apps-table \\
+          --callback-url https://example.com/callback
+  `,
+  )
+  .action(async (options) => {
+    try {
+      const appId = Number(options.appId);
+      if (isNaN(appId)) {
+        console.error('Error: --app-id must be a valid number');
+        process.exit(1);
+      }
+      const { updateWebhookConfig } = await import('./updateWebhookConfig');
+      await updateWebhookConfig({
+        appId,
+        webhookUrl: options.webhookUrl,
+        webhookSecretArn: options.webhookSecretArn,
+        callbackUrl: options.callbackUrl,
+        homepageUrl: options.homepageUrl,
+        setupUrl: options.setupUrl,
+        tableName: options.tableName,
+        kmsKeyArn: options.kmsKeyArn,
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      process.exit(1);
+    }
+  });
 program.parse(process.argv);
