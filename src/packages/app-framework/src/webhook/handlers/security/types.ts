@@ -19,4 +19,8 @@ export interface DismissalInfo {
   comment?: string;
 }
 
-export type LifecycleAction = 'resolved' | 'dismissed' | 'appeared' | 'reopened';
+export type LifecycleAction =
+  | 'resolved'
+  | 'dismissed'
+  | 'appeared'
+  | 'reopened';

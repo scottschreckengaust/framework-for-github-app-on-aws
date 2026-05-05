@@ -16,11 +16,6 @@
       "type": "build"
     },
     {
-      "name": "@aws-sdk/client-sns",
-      "version": "3.777.0",
-      "type": "build"
-    },
-    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"
@@ -87,12 +82,12 @@
     },
     {
       "name": "jsii-rosetta",
-      "version": "~5.6.0",
+      "version": "~5.9.0",
       "type": "build"
     },
     {
       "name": "jsii",
-      "version": "~5.6.0",
+      "version": "~5.9.0",
       "type": "build"
     },
     {
@@ -125,6 +120,10 @@
     },
     {
       "name": "@aws-sdk/client-secrets-manager",
+      "type": "bundled"
+    },
+    {
+      "name": "@aws-sdk/client-sns",
       "type": "bundled"
     },
     {
@@ -191,6 +190,10 @@
     },
     {
       "name": "@aws-sdk/client-secrets-manager",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-sns",
       "type": "runtime"
     },
     {

@@ -92,7 +92,7 @@ export const addTestTargets = (subProject: Project) => {
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
-  jsiiVersion: "~5.7.0",
+  jsiiVersion: "~5.9.0",
   projenrcTs: true,
   docgen: true,
   github: true,
@@ -182,6 +182,7 @@ const addPrettierConfig = (projectType: Project) => {
 export const createPackage = (config: PackageConfig) => {
   const tsProject = new awscdk.AwsCdkConstructLibrary({
     ...projectMetadata,
+    jsiiVersion: "~5.9.0",
     name: config.name,
     outdir: config.outdir,
     parent: project,
@@ -214,7 +215,8 @@ createPackage({
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-common",
@@ -225,14 +227,15 @@ createPackage({
     "@octokit/rest",
     "@octokit/types",
   ],
-  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-lambda@3.777.0", "@aws-sdk/client-s3@3.777.0", "@aws-sdk/client-sfn@3.777.0", "@aws-sdk/client-sns@3.777.0"],
+  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-lambda@3.777.0", "@aws-sdk/client-s3@3.777.0", "@aws-sdk/client-sfn@3.777.0"],
   bundledDeps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
-    "@aws-smithy/server-common",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
+    "@aws-smithy/server-common",
     "@aws-sdk/util-dynamodb",
     "aws-xray-sdk",
     "aws-lambda",
