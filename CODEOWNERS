@@ -1,0 +1,15 @@
+# Global owners
+* @scottschreckengaust
+
+# Webhook platform
+src/packages/app-framework/src/webhook/ @scottschreckengaust
+
+# Architecture decisions require review
+adr/ @scottschreckengaust
+
+# Operations runbooks
+docs/runbooks/ @scottschreckengaust
+
+# Infrastructure
+.projenrc.ts @scottschreckengaust
+src/packages/app-framework-test-app/ @scottschreckengaust
