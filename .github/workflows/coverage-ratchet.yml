@@ -1,0 +1,122 @@
+name: Coverage Ratchet
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/packages/app-framework/**'
+
+jobs:
+  ratchet:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - run: yarn install --frozen-lockfile
+
+      - name: Run coverage
+        working-directory: src/packages/app-framework
+        run: npx jest --coverage --coverageReporters=json-summary --passWithNoTests
+
+      - name: Check and bump thresholds
+        id: bump
+        working-directory: src/packages/app-framework
+        run: |
+          SUMMARY=coverage/coverage-summary.json
+          if [ ! -f "$SUMMARY" ]; then
+            echo "No coverage summary found"
+            exit 0
+          fi
+
+          STMTS=$(python3 -c "import json; print(int(json.load(open('$SUMMARY'))['total']['statements']['pct']))")
+          BRANCHES=$(python3 -c "import json; print(int(json.load(open('$SUMMARY'))['total']['branches']['pct']))")
+          FUNCS=$(python3 -c "import json; print(int(json.load(open('$SUMMARY'))['total']['functions']['pct']))")
+          LINES=$(python3 -c "import json; print(int(json.load(open('$SUMMARY'))['total']['lines']['pct']))")
+
+          CUR_STMTS=$(python3 -c "import json; print(json.load(open('package.json'))['jest']['coverageThreshold']['global']['statements'])")
+          CUR_BRANCHES=$(python3 -c "import json; print(json.load(open('package.json'))['jest']['coverageThreshold']['global']['branches'])")
+          CUR_FUNCS=$(python3 -c "import json; print(json.load(open('package.json'))['jest']['coverageThreshold']['global']['functions'])")
+          CUR_LINES=$(python3 -c "import json; print(json.load(open('package.json'))['jest']['coverageThreshold']['global']['lines'])")
+
+          echo "Current thresholds: stmts=$CUR_STMTS branches=$CUR_BRANCHES funcs=$CUR_FUNCS lines=$CUR_LINES"
+          echo "Actual coverage:    stmts=$STMTS branches=$BRANCHES funcs=$FUNCS lines=$LINES"
+
+          NEEDS_BUMP=false
+          NEW_STMTS=$CUR_STMTS
+          NEW_BRANCHES=$CUR_BRANCHES
+          NEW_FUNCS=$CUR_FUNCS
+          NEW_LINES=$CUR_LINES
+
+          if [ "$STMTS" -gt "$CUR_STMTS" ]; then NEW_STMTS=$STMTS; NEEDS_BUMP=true; fi
+          if [ "$BRANCHES" -gt "$CUR_BRANCHES" ]; then NEW_BRANCHES=$BRANCHES; NEEDS_BUMP=true; fi
+          if [ "$FUNCS" -gt "$CUR_FUNCS" ]; then NEW_FUNCS=$FUNCS; NEEDS_BUMP=true; fi
+          if [ "$LINES" -gt "$CUR_LINES" ]; then NEW_LINES=$LINES; NEEDS_BUMP=true; fi
+
+          if [ "$NEEDS_BUMP" = "false" ]; then
+            echo "Coverage has not increased, no bump needed"
+            exit 0
+          fi
+
+          echo "needs_bump=true" >> "$GITHUB_OUTPUT"
+          echo "stmts=$NEW_STMTS" >> "$GITHUB_OUTPUT"
+          echo "branches=$NEW_BRANCHES" >> "$GITHUB_OUTPUT"
+          echo "funcs=$NEW_FUNCS" >> "$GITHUB_OUTPUT"
+          echo "lines=$NEW_LINES" >> "$GITHUB_OUTPUT"
+
+      - name: Update thresholds in .projenrc.ts
+        if: steps.bump.outputs.needs_bump == 'true'
+        env:
+          NEW_STMTS: ${{ steps.bump.outputs.stmts }}
+          NEW_BRANCHES: ${{ steps.bump.outputs.branches }}
+          NEW_FUNCS: ${{ steps.bump.outputs.funcs }}
+          NEW_LINES: ${{ steps.bump.outputs.lines }}
+        run: |
+          sed -i "s/statements: [0-9]*/statements: $NEW_STMTS/" .projenrc.ts
+          sed -i "s/branches: [0-9]*/branches: $NEW_BRANCHES/" .projenrc.ts
+          sed -i "s/functions: [0-9]*/functions: $NEW_FUNCS/" .projenrc.ts
+          sed -i "s/lines: [0-9]*/lines: $NEW_LINES/" .projenrc.ts
+          npx projen
+
+      - name: Create PR
+        if: steps.bump.outputs.needs_bump == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEW_STMTS: ${{ steps.bump.outputs.stmts }}
+          NEW_BRANCHES: ${{ steps.bump.outputs.branches }}
+          NEW_FUNCS: ${{ steps.bump.outputs.funcs }}
+          NEW_LINES: ${{ steps.bump.outputs.lines }}
+        run: |
+          BRANCH="ci/coverage-ratchet-$(date +%Y%m%d)"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add .projenrc.ts src/packages/app-framework/package.json
+          git commit -m "ci: bump coverage thresholds to current levels
+
+          statements: ${NEW_STMTS}%
+          branches: ${NEW_BRANCHES}%
+          functions: ${NEW_FUNCS}%
+          lines: ${NEW_LINES}%"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "ci: bump coverage thresholds" \
+            --body "Coverage improved. Ratcheting thresholds to prevent regression.
+
+          | Metric | New |
+          |--------|-----|
+          | Statements | ${NEW_STMTS}% |
+          | Branches | ${NEW_BRANCHES}% |
+          | Functions | ${NEW_FUNCS}% |
+          | Lines | ${NEW_LINES}% |
+
+          Auto-generated by coverage-ratchet workflow." \
+            --base main \
+            --head "$BRANCH"
