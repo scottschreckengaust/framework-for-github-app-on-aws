@@ -269,6 +269,7 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
     jestConfig: {
       runner: "groups",
       verbose: true,
+      testPathIgnorePatterns: ["/node_modules/", ".*\\.accept\\.test\\.ts$"],
     },
   },
 });

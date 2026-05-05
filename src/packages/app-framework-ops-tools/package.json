@@ -64,6 +64,10 @@
     "coverageProvider": "v8",
     "runner": "groups",
     "verbose": true,
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      ".*\\.accept\\.test\\.ts$"
+    ],
     "testMatch": [
       "<rootDir>/@(src|test)/**/*(*.)@(spec|test).ts?(x)",
       "<rootDir>/@(src|test)/**/__tests__/**/*.ts?(x)"
@@ -79,10 +83,8 @@
     ],
     "coverageDirectory": "coverage",
     "coveragePathIgnorePatterns": [
-      "/node_modules/"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      ".*\\.accept\\.test\\.ts$"
     ],
     "watchPathIgnorePatterns": [
       "/node_modules/"
