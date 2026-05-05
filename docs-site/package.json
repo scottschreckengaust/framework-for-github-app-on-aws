@@ -1,0 +1,19 @@
+{
+  "name": "framework-github-app-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "prebuild": "node scripts/prebuild.mjs",
+    "dev": "node scripts/prebuild.mjs && astro dev",
+    "start": "node scripts/prebuild.mjs && astro dev",
+    "build": "node scripts/prebuild.mjs && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^5.7.0",
+    "@astrojs/starlight": "^0.34.0",
+    "sharp": "^0.33.0"
+  }
+}
