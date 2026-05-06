@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Linking, Platform } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Linking } from 'react-native';
 import Head from 'expo-router/head';
 
 const GITHUB_OAUTH_URL =
