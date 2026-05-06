@@ -156,9 +156,7 @@ project.package.file.addOverride("workspaces", [
 ]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
-project.preCompileTask.exec(
-  "npx lerna run build --concurrency=1 --sort",
-);
+project.preCompileTask.exec("npx lerna run build --concurrency=1 --sort");
 project.addScripts({
   cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
 });
