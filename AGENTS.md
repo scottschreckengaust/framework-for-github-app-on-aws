@@ -5,19 +5,22 @@
 **Every change follows this sequence. No exceptions.**
 
 ```
-main (clean) → Issue → Worktree → Build+Test → Push → Draft PR → CI Green → Review
+main (clean) → Issue → Worktree → Subagent → Build+Test → Push → Draft PR → CI Green → Ready → Notify
 ```
+
+The main context is the **orchestrator**. It coordinates, dispatches, and monitors. It does NOT write implementation code directly.
 
 1. **Main stays clean.** Never checkout a branch in the main worktree. Pull latest before starting.
 2. **Issue first.** Every non-trivial change starts with a GitHub issue. This is the async coordination signal — other agents and humans see intent before action.
-3. **Worktree isolated.** Create `git worktree add .claude/worktrees/<name> issues/<number>-<slug>` and work exclusively there.
-4. **Agent dispatched.** Subagents execute within the worktree: implement, test locally (`npx projen build`), commit specific files, push.
-5. **Draft PR.** Push creates a draft PR referencing the issue. PR title must use allowed types: `feat:`, `fix:`, or `chore:`.
-6. **CI green.** Wait for all workflow checks to pass. Fix failures in the same worktree.
-7. **Review.** Mark ready for review. Notify the operator.
-8. **Cleanup.** After merge: `git worktree remove` + `git branch -d` + `git pull origin main`.
+3. **Worktree created.** Create `git worktree add .claude/worktrees/<name> issues/<number>-<slug>` from the main worktree.
+4. **Subagent dispatched.** The main context dispatches a subagent to the worktree with clear instructions: what to implement, which files to touch, and what "done" looks like. The subagent implements, runs `npx projen build`, commits specific files, and pushes.
+5. **Draft PR.** The subagent (or main context) creates a draft PR referencing the issue. PR title must use allowed types: `feat:`, `fix:`, or `chore:`.
+6. **CI green.** Wait for all workflow checks to pass. If failures occur, dispatch the subagent again to fix in the same worktree.
+7. **Mark ready.** Once CI is green, mark the PR ready for review (`gh pr ready`).
+8. **Notify.** Inform the operator that the PR is ready for review with a link.
+9. **Cleanup.** After merge: `git worktree remove` + `git branch -d` + `git pull origin main`. Do this immediately.
 
-**If you're about to write code and haven't done steps 1-3, stop.**
+**If you're about to write code and haven't done steps 1-4, stop. You are the orchestrator, not the implementer.**
 
 ## Project
 
