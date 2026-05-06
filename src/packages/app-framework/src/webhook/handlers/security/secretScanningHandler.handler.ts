@@ -105,11 +105,16 @@ export const handler = async (event: SecretScanningEvent): Promise<void> => {
     );
   } else if (detail.action === 'resolved') {
     const resolution = alert.resolution;
-    if (resolution === 'revoked' || resolution === 'pattern_deleted' || resolution === 'pattern_edited') {
+    if (
+      resolution === 'revoked' ||
+      resolution === 'pattern_deleted' ||
+      resolution === 'pattern_edited'
+    ) {
       await executeLifecycle('resolved', { octokit, finding });
     } else {
       const dismissal: DismissalInfo = {
-        dismissedBy: alert.resolved_by?.login ?? detail.sender?.login ?? 'unknown',
+        dismissedBy:
+          alert.resolved_by?.login ?? detail.sender?.login ?? 'unknown',
         dismissedAt: alert.resolved_at ?? new Date().toISOString(),
         reason: resolution ?? 'No reason provided',
         comment: alert.resolution_comment ?? undefined,

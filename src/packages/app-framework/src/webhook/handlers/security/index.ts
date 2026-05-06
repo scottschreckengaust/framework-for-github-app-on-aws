@@ -10,4 +10,9 @@ export {
   getActionsForSeverity,
   clearConfigCache,
 } from './config';
-export { executeActions, executeLifecycle, ActionContext, LifecycleContext } from './actions';
+export {
+  executeActions,
+  executeLifecycle,
+  ActionContext,
+  LifecycleContext,
+} from './actions';

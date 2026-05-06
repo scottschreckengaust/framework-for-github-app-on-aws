@@ -78,7 +78,7 @@ async function executeIssue(ctx: ActionContext): Promise<void> {
       repo: finding.repo.name,
       issue_number: previousIssue.number,
       body: [
-        `:rotating_light: **Alert reopened**`,
+        ':rotating_light: **Alert reopened**',
         '',
         `This finding has reappeared. Severity: **${finding.severity}**`,
         '',
@@ -247,7 +247,7 @@ async function unblockCheckRun(ctx: LifecycleContext): Promise<void> {
     status: 'completed',
     conclusion: 'success',
     output: {
-      title: `Security: resolved`,
+      title: 'Security: resolved',
       summary: `${finding.title} has been resolved.`,
     },
   });
@@ -289,7 +289,7 @@ export async function executeLifecycle(
             repo: finding.repo.name,
             issue_number: finding.ref.pr,
             body: [
-              `:information_source: **Existing security finding on this branch**`,
+              ':information_source: **Existing security finding on this branch**',
               '',
               `**${finding.title}**`,
               `**Severity:** ${finding.severity} | **Tool:** ${finding.tool ?? 'Unknown'}`,

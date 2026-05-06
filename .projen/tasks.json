@@ -134,7 +134,7 @@
       },
       "steps": [
         {
-          "exec": "eslint --ext .ts,.md --fix --no-error-on-unmatched-pattern $@ src test docs build-tools projenrc .projenrc.ts",
+          "exec": "eslint --ext .ts,.md --fix --no-error-on-unmatched-pattern $@ src test build-tools projenrc .projenrc.ts",
           "receiveArgs": true
         }
       ]

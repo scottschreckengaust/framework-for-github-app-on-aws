@@ -12,7 +12,7 @@ const projectMetadata = {
   defaultReleaseBranch: "main",
   name: "@aws/app-framework-for-github-apps-on-aws",
 };
-const NODE_VERSION = ">18.0.0";
+const NODE_VERSION = ">=22.0.0";
 
 const RELEASE_PACKAGES = [
   "@aws/app-framework-for-github-apps-on-aws-ops-tools",
@@ -92,22 +92,29 @@ export const addTestTargets = (subProject: Project) => {
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
-  jsiiVersion: "~5.7.0",
+  jsiiVersion: "~5.9.0",
   projenrcTs: true,
   docgen: true,
   github: true,
-  gitignore: [".idea", "cdk.out", "__snapshots__", "classpath.json", ".remember"],
+  gitignore: [
+    ".idea",
+    "cdk.out",
+    "__snapshots__",
+    "classpath.json",
+    ".remember",
+  ],
   eslint: true,
   eslintOptions: {
     prettier: true,
     fileExtensions: [".ts", ".md"],
-    dirs: ["src", "test", "docs"],
-    ignorePatterns: ["src/packages/smithy/build/**/*", "docs/superpowers/**/*"],
+    dirs: ["src", "test"],
+    ignorePatterns: ["src/packages/**/*"],
   },
   jestOptions: {
     jestConfig: {
       runner: "groups",
       verbose: true,
+      modulePathIgnorePatterns: ["\\.claude/worktrees/"],
     },
   },
   cdkVersionPinning: false,
@@ -214,7 +221,8 @@ const appFramework = createPackage({
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-common",
@@ -225,15 +233,21 @@ const appFramework = createPackage({
     "@octokit/rest",
     "@octokit/types",
   ],
-  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-lambda@3.777.0", "@aws-sdk/client-s3@3.777.0", "@aws-sdk/client-sfn@3.777.0", "@aws-sdk/client-sns@3.777.0"],
+  devDeps: [
+    "aws-sdk-client-mock",
+    "@aws-sdk/client-lambda@3.777.0",
+    "@aws-sdk/client-s3@3.777.0",
+    "@aws-sdk/client-sfn@3.777.0",
+  ],
   bundledDeps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
-    "@aws-smithy/server-common",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-common",
     "aws-xray-sdk",
     "aws-lambda",
     "re2-wasm",
@@ -253,7 +267,6 @@ appFramework.jest!.config.coverageThreshold = {
   },
 };
 
-
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
   name: "@aws/app-framework-for-github-apps-on-aws-ops-tools",
@@ -263,6 +276,11 @@ const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   release: false,
   releaseToNpm: false,
   repository: projectMetadata.repositoryUrl,
+  tsconfig: {
+    compilerOptions: {
+      skipLibCheck: true,
+    },
+  },
   deps: [
     "@aws-sdk/client-resource-groups-tagging-api",
     "@aws-sdk/client-kms",

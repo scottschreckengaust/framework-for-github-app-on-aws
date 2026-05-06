@@ -16,11 +16,6 @@
       "type": "build"
     },
     {
-      "name": "@aws-sdk/client-sns",
-      "version": "3.777.0",
-      "type": "build"
-    },
-    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"
@@ -128,6 +123,10 @@
       "type": "bundled"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "type": "bundled"
+    },
+    {
       "name": "@aws-sdk/util-dynamodb",
       "type": "bundled"
     },
@@ -191,6 +190,10 @@
     },
     {
       "name": "@aws-sdk/client-secrets-manager",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-sns",
       "type": "runtime"
     },
     {
