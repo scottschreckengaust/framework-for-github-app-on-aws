@@ -102,6 +102,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
     "__snapshots__",
     "classpath.json",
     ".remember",
+    ".claude/worktrees/",
   ],
   eslint: true,
   eslintOptions: {
