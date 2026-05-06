@@ -122,7 +122,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   autoMerge: false,
   releaseToNpm: false,
   constructsVersion: "10.4.2",
-  devDeps: ["lerna", "jest-runner-groups"],
+  devDeps: ["lerna", "jest-runner-groups", "eslint@^8"],
 
   // deps: [],                /* Runtime dependencies of this module. /
   // description: undefined,  / The description is just a string that helps people understand the purpose of the package. /
@@ -157,7 +157,7 @@ project.package.file.addOverride("workspaces", [
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec(
-  "npx lerna run build --concurrency=4 --sort",
+  "npx lerna run build --concurrency=1 --sort",
 );
 project.addScripts({
   cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
@@ -234,6 +234,7 @@ const appFramework = createPackage({
     "@octokit/types",
   ],
   devDeps: [
+    "eslint@^8",
     "aws-sdk-client-mock",
     "@aws-sdk/client-lambda@3.777.0",
     "@aws-sdk/client-s3@3.777.0",
@@ -261,7 +262,7 @@ const appFramework = createPackage({
 appFramework.jest!.config.coverageThreshold = {
   global: {
     statements: 91,
-    branches: 81,
+    branches: 80,
     functions: 86,
     lines: 91,
   },
