@@ -3,10 +3,10 @@ import { JobPermission } from "projen/lib/github/workflows-model";
 import { TypeScriptAppProject } from "projen/lib/typescript";
 
 const projectMetadata = {
-  author: "Amazon OSPO",
-  authorAddress: "osa-dev+puzzleglue@amazon.com",
+  author: "Scott Schreckengaust",
+  authorAddress: "scottschreckengaust@users.noreply.github.com",
   repositoryUrl:
-    "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
+    "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git",
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
@@ -157,7 +157,7 @@ project.package.file.addOverride("workspaces", [
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
 project.preCompileTask.exec(
-  "npx lerna run build --concurrency=1 --no-stream --sort",
+  "npx lerna run build --concurrency=4 --sort",
 );
 project.addScripts({
   cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",

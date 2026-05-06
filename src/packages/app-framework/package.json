@@ -2,7 +2,7 @@
   "name": "@aws/app-framework-for-github-apps-on-aws",
   "repository": {
     "type": "git",
-    "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
+    "url": "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git"
   },
   "scripts": {
     "accept": "npx projen accept",
@@ -24,8 +24,8 @@
     "projen": "npx projen"
   },
   "author": {
-    "name": "Amazon OSPO",
-    "email": "osa-dev+puzzleglue@amazon.com",
+    "name": "Scott Schreckengaust",
+    "email": "scottschreckengaust@users.noreply.github.com",
     "organization": false
   },
   "devDependencies": {
