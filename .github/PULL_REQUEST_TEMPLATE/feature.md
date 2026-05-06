@@ -7,6 +7,12 @@
 ## Changes
 <!-- List key changes -->
 
+## Agentic Workflow
+- [ ] GitHub issue created/referenced before work began
+- [ ] Work done in dedicated worktree (not main)
+- [ ] No `.claude/worktrees/*` entries in staged files
+- [ ] `npx projen` run and all generated files committed
+
 ## Testing
 - [ ] Unit tests pass (`npx projen build`)
 - [ ] TypeScript compiles (`npx tsc --noEmit`)

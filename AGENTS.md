@@ -1,5 +1,27 @@
 # AGENTS.md
 
+## Agentic Workflow: Issue-First, Worktree-Isolated, Agent-Dispatched
+
+**Every change follows this sequence. No exceptions.**
+
+```
+main (clean) → Issue → Worktree → Subagent → Build+Test → Push → Draft PR → CI Green → Ready → Notify
+```
+
+The main context is the **orchestrator**. It coordinates, dispatches, and monitors. It does NOT write implementation code directly.
+
+1. **Main stays clean.** Never checkout a branch in the main worktree. Pull latest before starting.
+2. **Issue first.** Every non-trivial change starts with a GitHub issue. This is the async coordination signal — other agents and humans see intent before action.
+3. **Worktree created.** Create `git worktree add .claude/worktrees/<name> issues/<number>-<slug>` from the main worktree.
+4. **Subagent dispatched.** The main context dispatches a subagent to the worktree with clear instructions: what to implement, which files to touch, and what "done" looks like. The subagent implements, runs `npx projen build`, commits specific files, and pushes.
+5. **Draft PR.** The subagent (or main context) creates a draft PR referencing the issue. PR title must use allowed types: `feat:`, `fix:`, or `chore:`.
+6. **CI green.** Wait for all workflow checks to pass. If failures occur, dispatch the subagent again to fix in the same worktree.
+7. **Mark ready.** Once CI is green, mark the PR ready for review (`gh pr ready`).
+8. **Notify.** Inform the operator that the PR is ready for review with a link.
+9. **Cleanup.** After merge: `git worktree remove` + `git branch -d` + `git pull origin main`. Do this immediately.
+
+**If you're about to write code and haven't done steps 1-4, stop. You are the orchestrator, not the implementer.**
+
 ## Project
 
 Framework for GitHub Apps on AWS — a serverless bot platform that receives GitHub webhook events, authenticates users via OAuth, and orchestrates workflows via Step Functions.
@@ -51,6 +73,7 @@ cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
 - **Verification before completion** — always deploy + E2E test before claiming done
 - **ADRs for decisions** — if it's a significant choice, document it in `adr/`
 - **Issues for backlog** — P0/P1/P2 with effort, details sufficient for agent pickup
+- **PR titles** — must use `feat:`, `fix:`, or `chore:` prefix (enforced by PR lint)
 
 ## Conventions
 
@@ -90,18 +113,47 @@ cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
 
 The main worktree MUST stay on `main`. All branch work happens in dedicated worktrees.
 
+### Creating a worktree
+
+```bash
+# From the main worktree:
+git pull origin main
+git branch issues/<number>-<slug>
+git worktree add .claude/worktrees/<name> issues/<number>-<slug>
+cd .claude/worktrees/<name>
+```
+
 ### Rules
 1. **Main worktree = `main` only.** Never `git checkout <feature-branch>` in the main worktree.
-2. **Create worktrees for branch work:** `git worktree add .claude/worktrees/<name> <branch>`
-3. **Always `cd` to the worktree** before running git commands for that branch.
-4. **Never `git add -A`** — always add specific files. `-A` picks up nested worktrees as submodules.
-5. **Clean up after merge:** `git worktree remove .claude/worktrees/<name>` immediately.
-6. **Subagents with `isolation: "worktree"`** get automatic worktrees — don't create duplicates.
-7. **After subagent completes:** unlock + remove its worktree before doing manual branch work.
+2. **Always `cd` to the worktree** before running git commands for that branch.
+3. **Never `git add -A`** — always add specific files. `-A` picks up nested worktrees as submodules.
+4. **Subagents with `isolation: "worktree"`** get automatic worktrees — don't create duplicates.
+5. **After subagent completes:** unlock + remove its worktree before doing manual branch work.
+
+### Cleanup after merge
+
+```bash
+# From the main worktree:
+git worktree remove .claude/worktrees/<name>
+git branch -d issues/<number>-<slug>
+git pull origin main
+```
+
+Do this immediately after merge. Do NOT leave stale worktrees around.
+
+### Bulk cleanup (stale worktrees)
+
+```bash
+git worktree list                                    # identify non-main worktrees
+git -C .claude/worktrees/<name> status --short       # must be empty
+gh pr list --state merged --head <branch-name>       # PR must be merged
+git worktree remove .claude/worktrees/<name>         # remove
+git branch -d <branch-name>                          # delete local branch
+```
 
 ### Common failures this prevents
 - Dirty state leaking between branches
-- `.claude/worktrees/*` committed as git submodules
+- `.claude/worktrees/*` committed as git submodules (mode 160000)
 - `fatal: branch already used by worktree`
 - CWD confusion (running commands in wrong directory)
 - Stale changes persisting across checkout
