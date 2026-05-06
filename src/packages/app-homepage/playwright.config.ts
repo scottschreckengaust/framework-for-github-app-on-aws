@@ -20,21 +20,12 @@ export default defineConfig({
       },
     },
     {
-      name: 'mobile',
-      use: {
-        viewport: { width: 390, height: 844 },
-        isMobile: true,
-        userAgent:
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-      },
+      name: 'iphone',
+      use: { ...devices['iPhone 15'] },
     },
     {
-      name: 'tablet',
-      use: {
-        viewport: { width: 820, height: 1180 },
-        userAgent:
-          'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko)',
-      },
+      name: 'android',
+      use: { ...devices['Pixel 7'] },
     },
   ],
   webServer: {

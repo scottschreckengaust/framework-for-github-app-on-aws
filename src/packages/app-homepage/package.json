@@ -8,6 +8,7 @@
     "build": "expo export --platform web",
     "export": "expo export --platform web",
     "test": "jest",
+    "test:e2e:install": "playwright install --with-deps chromium webkit",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed"
   },
