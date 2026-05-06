@@ -206,7 +206,7 @@ export const createPackage = (config: PackageConfig) => {
   return tsProject;
 };
 
-createPackage({
+const appFramework = createPackage({
   name: "@aws/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
@@ -243,6 +243,16 @@ createPackage({
     "@octokit/types",
   ],
 });
+
+appFramework.jest!.config.coverageThreshold = {
+  global: {
+    statements: 91,
+    branches: 81,
+    functions: 86,
+    lines: 91,
+  },
+};
+
 
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
