@@ -93,6 +93,7 @@ export const addTestTargets = (subProject: Project) => {
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
   jsiiVersion: "~5.9.0",
+  workflowNodeVersion: "22",
   projenrcTs: true,
   docgen: true,
   github: true,
@@ -548,7 +549,7 @@ if (centralizedRelease) {
           name: "Setup Node.js",
           uses: "actions/setup-node@v4",
           with: {
-            "node-version": "lts/*",
+            "node-version": "22",
             "registry-url": "https://registry.npmjs.org",
           },
         },
@@ -708,7 +709,7 @@ if (buildArtifactWorkflow) {
           name: "Setup Node.js",
           uses: "actions/setup-node@v4",
           with: {
-            "node-version": "lts/*",
+            "node-version": "22",
             "registry-url": "https://registry.npmjs.org",
           },
         },
