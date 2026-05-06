@@ -86,6 +86,26 @@ cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
 2. Pass in test-app `main.ts`
 3. Deploy with new `--context` param
 
+## Git Worktree Discipline
+
+The main worktree MUST stay on `main`. All branch work happens in dedicated worktrees.
+
+### Rules
+1. **Main worktree = `main` only.** Never `git checkout <feature-branch>` in the main worktree.
+2. **Create worktrees for branch work:** `git worktree add .claude/worktrees/<name> <branch>`
+3. **Always `cd` to the worktree** before running git commands for that branch.
+4. **Never `git add -A`** — always add specific files. `-A` picks up nested worktrees as submodules.
+5. **Clean up after merge:** `git worktree remove .claude/worktrees/<name>` immediately.
+6. **Subagents with `isolation: "worktree"`** get automatic worktrees — don't create duplicates.
+7. **After subagent completes:** unlock + remove its worktree before doing manual branch work.
+
+### Common failures this prevents
+- Dirty state leaking between branches
+- `.claude/worktrees/*` committed as git submodules
+- `fatal: branch already used by worktree`
+- CWD confusion (running commands in wrong directory)
+- Stale changes persisting across checkout
+
 ## Known Gotchas
 
 - `mwinit` required before AWS operations (credentials expire)
