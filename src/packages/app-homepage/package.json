@@ -9,7 +9,9 @@
     "export": "expo export --platform web",
     "test": "jest",
     "test:e2e:install": "playwright install --with-deps chromium webkit",
+    "test:e2e:install:local": "playwright install --with-deps chromium",
     "test:e2e": "playwright test",
+    "test:e2e:local": "playwright test --project=desktop --project=android",
     "test:e2e:headed": "playwright test --headed"
   },
   "jest": {
