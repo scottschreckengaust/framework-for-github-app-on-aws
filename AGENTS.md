@@ -106,6 +106,26 @@ The main worktree MUST stay on `main`. All branch work happens in dedicated work
 - CWD confusion (running commands in wrong directory)
 - Stale changes persisting across checkout
 
+## Pre-Push Checklist (Projen Mutation Prevention)
+
+CI has a "Find mutations" step that fails if committed files differ from what `npx projen` generates. This costs 18+ minutes per failed run.
+
+### Before EVERY push:
+1. `npx projen` — regenerate all config files
+2. `git diff` — review what projen changed
+3. `git add` the changed files (tasks.json, package.json, etc.)
+4. `npx projen build` — full local build to catch test/lint/synth failures
+5. Only push when build exits 0
+
+### Why this matters
+- Projen reformats `.projenrc.ts` (e.g., multi-line → single-line)
+- Projen regenerates `tasks.json`, `package.json`, `tsconfig` on every run
+- If you commit `.projenrc.ts` without regenerating, CI detects the drift and fails
+- Manual formatting that differs from Projen's output causes mutation failures
+
+### Rule
+**Never push without running `npx projen` first.** If you edited `.projenrc.ts`, the regenerated files ARE part of your commit.
+
 ## Known Gotchas
 
 - `mwinit` required before AWS operations (credentials expire)
