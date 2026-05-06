@@ -147,7 +147,8 @@ export const handler = async (event: DependabotEvent): Promise<void> => {
     );
   } else if (DISMISS_ACTIONS.includes(detail.action)) {
     const dismissal: DismissalInfo = {
-      dismissedBy: alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
+      dismissedBy:
+        alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
       dismissedAt: alert.dismissed_at ?? new Date().toISOString(),
       reason: alert.dismissed_reason ?? 'No reason provided',
       comment: alert.dismissed_comment ?? undefined,

@@ -9,7 +9,8 @@ export async function deviceFlowAuth(
   // Step 1: Request device code
   const codeResp = await fetch('https://github.com/login/device/code', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    // prettier-ignore
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({ client_id: clientId }),
   });
   const codeData = (await codeResp.json()) as {
@@ -39,9 +40,10 @@ export async function deviceFlowAuth(
       'https://github.com/login/oauth/access_token',
       {
         method: 'POST',
+        // prettier-ignore
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify({
           client_id: clientId,
@@ -93,9 +95,9 @@ export async function deviceFlowAuth(
               Plaintext: Buffer.from(refreshToken),
             }),
           );
-          storedRefreshToken = Buffer.from(
-            encRefresh.CiphertextBlob!,
-          ).toString('base64');
+          storedRefreshToken = Buffer.from(encRefresh.CiphertextBlob!).toString(
+            'base64',
+          );
         }
         console.log('Tokens encrypted with KMS key');
       }

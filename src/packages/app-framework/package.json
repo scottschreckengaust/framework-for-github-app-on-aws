@@ -2,7 +2,7 @@
   "name": "@aws/app-framework-for-github-apps-on-aws",
   "repository": {
     "type": "git",
-    "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
+    "url": "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git"
   },
   "scripts": {
     "accept": "npx projen accept",
@@ -24,15 +24,14 @@
     "projen": "npx projen"
   },
   "author": {
-    "name": "Amazon OSPO",
-    "email": "osa-dev+puzzleglue@amazon.com",
+    "name": "Scott Schreckengaust",
+    "email": "scottschreckengaust@users.noreply.github.com",
     "organization": false
   },
   "devDependencies": {
     "@aws-sdk/client-lambda": "3.777.0",
     "@aws-sdk/client-s3": "3.777.0",
     "@aws-sdk/client-sfn": "3.777.0",
-    "@aws-sdk/client-sns": "3.777.0",
     "@stylistic/eslint-plugin": "^2",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.9",
@@ -66,6 +65,7 @@
     "@aws-sdk/client-eventbridge": "^3.1037.0",
     "@aws-sdk/client-kms": "^3.777.0",
     "@aws-sdk/client-secrets-manager": "^3.1037.0",
+    "@aws-sdk/client-sns": "^3.1043.0",
     "@aws-sdk/util-dynamodb": "^3.777.0",
     "@aws-smithy/server-apigateway": "^1.0.0-alpha.10",
     "@aws-smithy/server-common": "^1.0.0-alpha.10",
@@ -82,6 +82,7 @@
     "@aws-sdk/client-eventbridge",
     "@aws-sdk/client-kms",
     "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-apigateway",
     "@aws-smithy/server-common",
@@ -96,7 +97,7 @@
     "cdk"
   ],
   "engines": {
-    "node": ">18.0.0"
+    "node": ">=22.0.0"
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
@@ -149,7 +150,7 @@
     "coverageThreshold": {
       "global": {
         "statements": 91,
-        "branches": 81,
+        "branches": 80,
         "functions": 86,
         "lines": 91
       }

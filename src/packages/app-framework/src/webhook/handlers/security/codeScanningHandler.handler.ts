@@ -51,7 +51,12 @@ interface CodeScanningEvent {
 
 const HANDLER_NAME = 'codeScanningHandler';
 
-const ACTIVE_ACTIONS = ['created', 'reopened', 'reopened_by_user', 'reintroduced'];
+const ACTIVE_ACTIONS = [
+  'created',
+  'reopened',
+  'reopened_by_user',
+  'reintroduced',
+];
 const RESOLVE_ACTIONS = ['fixed'];
 const DISMISS_ACTIONS = ['closed_by_user'];
 const APPEAR_ACTIONS = ['appeared_in_branch'];
@@ -151,7 +156,8 @@ export const handler = async (event: CodeScanningEvent): Promise<void> => {
     );
   } else if (DISMISS_ACTIONS.includes(detail.action)) {
     const dismissal: DismissalInfo = {
-      dismissedBy: alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
+      dismissedBy:
+        alert.dismissed_by?.login ?? detail.sender?.login ?? 'unknown',
       dismissedAt: alert.dismissed_at ?? new Date().toISOString(),
       reason: alert.dismissed_reason ?? 'No reason provided',
       comment: alert.dismissed_comment ?? undefined,

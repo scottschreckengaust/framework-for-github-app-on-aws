@@ -19,9 +19,9 @@ npx cdk deploy the-app-framework-test-stack \
 
 ## Context Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `webhookSecretArn` | Secrets Manager ARN for webhook HMAC secret |
-| `gitHubClientId` | GitHub App OAuth Client ID |
-| `oauthClientSecretArn` | Secrets Manager ARN for OAuth client secret |
-| `alertEmail` | (Optional) Email for CloudWatch alarm notifications |
+| Parameter              | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `webhookSecretArn`     | Secrets Manager ARN for webhook HMAC secret         |
+| `gitHubClientId`       | GitHub App OAuth Client ID                          |
+| `oauthClientSecretArn` | Secrets Manager ARN for OAuth client secret         |
+| `alertEmail`           | (Optional) Email for CloudWatch alarm notifications |
