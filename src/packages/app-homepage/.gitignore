@@ -3,3 +3,6 @@ dist/
 .expo/
 web-build/
 *.tsbuildinfo
+test-results/
+playwright-report/
+blob-report/

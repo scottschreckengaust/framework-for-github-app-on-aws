@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, Pressable, Linking } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Linking, Platform } from 'react-native';
+import Head from 'expo-router/head';
 
 const GITHUB_OAUTH_URL =
   'https://github.com/login/oauth/authorize?client_id=PLACEHOLDER&scope=repo';
@@ -15,6 +16,9 @@ const COMMANDS = [
 export default function LandingPage() {
   return (
     <View style={styles.container}>
+      <Head>
+        <title>ai3-mvp - GitHub App</title>
+      </Head>
       <View style={styles.hero}>
         <Text style={styles.title}>ai3-mvp</Text>
         <Text style={styles.subtitle}>
@@ -177,6 +181,6 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: '#484f58',
+    color: '#8b949e',
   },
 });
