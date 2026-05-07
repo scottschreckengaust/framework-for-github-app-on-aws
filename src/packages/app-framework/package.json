@@ -1,5 +1,5 @@
 {
-  "name": "@aws/app-framework-for-github-apps-on-aws",
+  "name": "@scottschreckengaust/app-framework-for-github-apps-on-aws",
   "repository": {
     "type": "git",
     "url": "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git"
@@ -69,9 +69,9 @@
     "@aws-sdk/util-dynamodb": "^3.777.0",
     "@aws-smithy/server-apigateway": "^1.0.0-alpha.10",
     "@aws-smithy/server-common": "^1.0.0-alpha.10",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk": "^0.0.19",
     "@octokit/rest": "^21.1.1",
     "@octokit/types": "^14.0.0",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk": "^0.0.1",
     "aws-lambda": "^1.0.7",
     "aws-xray-sdk": "^3.10.3",
     "re2-wasm": "^1.0.2"
@@ -86,9 +86,9 @@
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-apigateway",
     "@aws-smithy/server-common",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk",
     "@octokit/rest",
     "@octokit/types",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
     "aws-lambda",
     "aws-xray-sdk",
     "re2-wasm"

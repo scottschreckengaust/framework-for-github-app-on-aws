@@ -1,12 +1,12 @@
 import {
-  RefreshCachedDataInput,
-  RefreshCachedDataOutput,
-  getRefreshCachedDataHandler,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
-import {
   convertEvent,
   convertVersion1Response,
 } from '@aws-smithy/server-apigateway';
+import {
+  RefreshCachedDataInput,
+  RefreshCachedDataOutput,
+  getRefreshCachedDataHandler,
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import {
   APIGatewayEventRequestContextIAMAuthorizer,
   APIGatewayEventRequestContextV2WithAuthorizer,

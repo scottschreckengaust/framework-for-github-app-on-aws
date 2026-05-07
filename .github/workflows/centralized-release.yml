@@ -27,7 +27,7 @@ jobs:
         id: npm_versions
         run: |-
           get_version() { npm view "$1" version 2>/dev/null || echo "0.0.0"; }
-          PACKAGES="@aws/app-framework-for-github-apps-on-aws-ops-tools @aws/app-framework-for-github-apps-on-aws-client @aws/app-framework-for-github-apps-on-aws-ssdk @aws/app-framework-for-github-apps-on-aws"
+          PACKAGES="@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools @scottschreckengaust/app-framework-for-github-apps-on-aws-client @scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk @scottschreckengaust/app-framework-for-github-apps-on-aws"
           VERSIONS=()
           echo "Found NPM versions:"
           for pkg in $PACKAGES; do
@@ -128,7 +128,7 @@ jobs:
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
       - name: Set package list
-        run: echo "PACKAGES=@aws/app-framework-for-github-apps-on-aws-ops-tools @aws/app-framework-for-github-apps-on-aws-client @aws/app-framework-for-github-apps-on-aws-ssdk @aws/app-framework-for-github-apps-on-aws" >> $GITHUB_ENV
+        run: echo "PACKAGES=@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools @scottschreckengaust/app-framework-for-github-apps-on-aws-client @scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk @scottschreckengaust/app-framework-for-github-apps-on-aws" >> $GITHUB_ENV
       - name: Setup Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:

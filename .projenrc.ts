@@ -10,15 +10,15 @@ const projectMetadata = {
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
-  name: "@aws/app-framework-for-github-apps-on-aws",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws",
 };
 const NODE_VERSION = ">=22.0.0";
 
 const RELEASE_PACKAGES = [
-  "@aws/app-framework-for-github-apps-on-aws-ops-tools",
-  "@aws/app-framework-for-github-apps-on-aws-client",
-  "@aws/app-framework-for-github-apps-on-aws-ssdk",
-  "@aws/app-framework-for-github-apps-on-aws",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-client",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws",
 ];
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
@@ -104,6 +104,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
     "classpath.json",
     ".remember",
     ".claude/worktrees/",
+    ".env",
   ],
   eslint: true,
   eslintOptions: {
@@ -242,7 +243,7 @@ export const createPackage = (config: PackageConfig) => {
 };
 
 const appFramework = createPackage({
-  name: "@aws/app-framework-for-github-apps-on-aws",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
     "@aws-lambda-powertools/metrics",
@@ -256,7 +257,7 @@ const appFramework = createPackage({
     "@aws-smithy/server-common",
     "aws-lambda",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
     "re2-wasm",
     "@octokit/rest",
     "@octokit/types",
@@ -281,7 +282,7 @@ const appFramework = createPackage({
     "aws-lambda",
     "re2-wasm",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
     "@octokit/rest",
     "@octokit/types",
   ],
@@ -298,7 +299,7 @@ appFramework.jest!.config.coverageThreshold = {
 
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "@aws/app-framework-for-github-apps-on-aws-ops-tools",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools",
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
@@ -350,7 +351,7 @@ configureMarkDownLinting(theAppFrameworkOpsTools);
 
 const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   ...projectMetadata,
-  name: "@aws/app-framework-test-app",
+  name: "@scottschreckengaust/app-framework-test-app",
   outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
@@ -358,8 +359,8 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",
-    "@aws/app-framework-for-github-apps-on-aws",
-    "@aws/app-framework-for-github-apps-on-aws-client",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-client",
     "@aws-crypto/sha256-js",
     "@aws-sdk/credential-provider-node",
   ],

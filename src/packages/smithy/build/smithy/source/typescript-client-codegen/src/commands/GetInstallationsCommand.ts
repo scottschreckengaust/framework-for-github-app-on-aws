@@ -41,8 +41,8 @@ export interface GetInstallationsCommandOutput extends GetInstallationsOutput, _
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript
- * import { AppFrameworkClient, GetInstallationsCommand } from "@aws/app-framework-for-github-apps-on-aws-client"; // ES Modules import
- * // const { AppFrameworkClient, GetInstallationsCommand } = require("@aws/app-framework-for-github-apps-on-aws-client"); // CommonJS import
+ * import { AppFrameworkClient, GetInstallationsCommand } from "@scottschreckengaust/app-framework-for-github-apps-on-aws-client"; // ES Modules import
+ * // const { AppFrameworkClient, GetInstallationsCommand } = require("@scottschreckengaust/app-framework-for-github-apps-on-aws-client"); // CommonJS import
  * const client = new AppFrameworkClient(config);
  * const input = { // GetInstallationsInput
  *   maxResults: Number("int"),

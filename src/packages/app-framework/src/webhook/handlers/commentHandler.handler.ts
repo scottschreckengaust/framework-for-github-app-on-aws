@@ -150,7 +150,7 @@ export const handler = async (event: CommentEvent): Promise<void> => {
           owner,
           repo,
           issueNumber: detail.payload.issue.number,
-          body: `@${detail.sender.login} I need you to [authorize this app](${authUrl}?repo=${detail.repository.full_name}&issue=${detail.payload.issue.number}) before I can act on your behalf.`,
+          body: `@${detail.sender.login} I need you to authorize this app before I can act on your behalf.\n\n[Open authorization page](${authUrl}?repo=${detail.repository.full_name}&issue=${detail.payload.issue.number}) (tip: open in a new tab)`,
         });
       } else {
         await postComment({
