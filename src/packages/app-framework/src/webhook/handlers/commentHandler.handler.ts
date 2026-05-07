@@ -40,11 +40,11 @@ async function getInstallationToken(): Promise<string | null> {
   if (!appId || !functionName || !nodeId) return null;
 
   try {
-    /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
+    /* eslint-disable import/no-extraneous-dependencies */
     const { LambdaClient, InvokeCommand } = await import(
       '@aws-sdk/client-lambda'
     );
-    /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+    /* eslint-enable import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
     const accountId =
       (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';

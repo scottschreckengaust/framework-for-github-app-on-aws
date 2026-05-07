@@ -99,11 +99,10 @@ async function getUserToken(userId: number): Promise<string | null> {
   if (!tableName) return null;
 
   try {
-    /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
     const { DynamoDBClient, GetItemCommand } = await import(
       '@aws-sdk/client-dynamodb'
     );
-    /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+
     const ddb = new DynamoDBClient({});
     const resp = await ddb.send(
       new GetItemCommand({
@@ -125,9 +124,8 @@ async function getUserToken(userId: number): Promise<string | null> {
 
     // Decrypt
     if (keyArn) {
-      /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
       const { KMSClient, DecryptCommand } = await import('@aws-sdk/client-kms');
-      /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+
       const kms = new KMSClient({});
       const decResp = await kms.send(
         new DecryptCommand({
@@ -152,11 +150,11 @@ async function getInstallationToken(): Promise<string | null> {
   if (!functionName || !appId || !nodeId) return null;
 
   try {
-    /* eslint-disable import/no-unresolved, import/no-extraneous-dependencies */
+    /* eslint-disable import/no-extraneous-dependencies */
     const { LambdaClient, InvokeCommand } = await import(
       '@aws-sdk/client-lambda'
     );
-    /* eslint-enable import/no-unresolved, import/no-extraneous-dependencies */
+    /* eslint-enable import/no-extraneous-dependencies */
     const lambda = new LambdaClient({});
     const accountId =
       (process.env.AWS_LAMBDA_FUNCTION_ARN || '').split(':')[4] || 'unknown';

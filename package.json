@@ -5,10 +5,14 @@
     "url": "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git"
   },
   "scripts": {
-    "build": "npx lerna run build --concurrency=1 --sort",
-    "test": "npx lerna run test",
-    "lint": "npx lerna run lint",
-    "clean": "npx lerna run clean",
+    "build": "yarn build:smithy && yarn build:app-framework && yarn build:ops-tools && yarn build:test-app",
+    "build:smithy": "yarn workspace @scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk build && yarn workspace @scottschreckengaust/app-framework-for-github-apps-on-aws-client build",
+    "build:app-framework": "yarn workspace @scottschreckengaust/app-framework-for-github-apps-on-aws build",
+    "build:ops-tools": "yarn workspace @scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools build",
+    "build:test-app": "yarn workspace @scottschreckengaust/app-framework-test-app build",
+    "test": "yarn workspaces run test",
+    "lint": "yarn workspaces run lint",
+    "clean": "yarn workspaces run clean",
     "cli": "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts"
   },
   "author": {

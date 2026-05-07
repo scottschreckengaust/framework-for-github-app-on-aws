@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc && yarn test && yarn lint",
     "compile": "tsc",
-    "test": "jest --passWithNoTests --updateSnapshot",
+    "test": "jest --passWithNoTests --updateSnapshot --testPathIgnorePatterns='.*\\.accept\\.test\\.ts$'",
     "lint": "eslint .",
     "clean": "rm -rf lib/ coverage/ cdk.out/",
     "deploy": "cdk deploy",

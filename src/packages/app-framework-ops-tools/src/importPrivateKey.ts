@@ -682,9 +682,8 @@ export const validateJWTImpl: ValidateJWT = async ({ appId, signFunction }) => {
     const jwt = `${signingInput}.${encodedSignature}`;
     const response = await fetch('https://api.github.com/app', {
       headers: {
-        // eslint-disable-next-line quote-props
         Authorization: `Bearer ${jwt}`,
-        // eslint-disable-next-line quote-props
+
         Accept: 'application/vnd.github.v3+json',
       },
     });

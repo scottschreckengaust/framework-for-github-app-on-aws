@@ -1,6 +1,7 @@
 import stylisticPlugin from '@stylistic/eslint-plugin';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import eslintConfigPrettier from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 import prettierPlugin from 'eslint-plugin-prettier';
 
@@ -120,4 +121,5 @@ export default [
       ],
     },
   },
+  eslintConfigPrettier,
 ];
