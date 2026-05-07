@@ -61,6 +61,7 @@ npx cdk deploy the-app-framework-test-stack \
   --context webhookSecretArn=<ARN> \
   --context gitHubClientId=<ID> \
   --context oauthClientSecretArn=<ARN>
+# See docs/runbooks/deploy.md for current context values.
 
 # Run specific tests
 cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
