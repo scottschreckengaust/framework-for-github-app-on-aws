@@ -36,6 +36,7 @@ __snapshots__
 classpath.json
 .remember
 .claude/worktrees/
+.env
 /test-reports/
 junit.xml
 /coverage/

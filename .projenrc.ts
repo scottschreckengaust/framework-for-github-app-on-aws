@@ -104,6 +104,7 @@ export const project = new awscdk.AwsCdkConstructLibrary({
     "classpath.json",
     ".remember",
     ".claude/worktrees/",
+    ".env",
   ],
   eslint: true,
   eslintOptions: {
