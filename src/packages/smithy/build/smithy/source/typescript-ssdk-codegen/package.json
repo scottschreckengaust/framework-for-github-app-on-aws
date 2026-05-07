@@ -1,6 +1,6 @@
 {
-    "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
-    "description": "@aws/app-framework-for-github-apps-on-aws-ssdk server",
+    "name": "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
+    "description": "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk server",
     "version": "0.0.1",
     "scripts": {
         "build": "concurrently 'yarn:build:cjs' 'yarn:build:es' 'yarn:build:types'",
@@ -64,11 +64,11 @@
         "dist-*/**"
     ],
     "author": {
-        "name": "Amazon OSPO"
+        "name": "Scott Schreckengaust"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git"
+        "url": "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git"
     },
     "license": "Apache-2.0"
 }

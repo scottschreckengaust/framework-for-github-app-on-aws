@@ -11,6 +11,7 @@ jest.mock('@aws-sdk/client-dynamodb', () => ({
 }));
 
 import { isAlreadyProcessed } from './idempotency';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { ConditionalCheckFailedException } = require('@aws-sdk/client-dynamodb');
 
 describe('isAlreadyProcessed', () => {

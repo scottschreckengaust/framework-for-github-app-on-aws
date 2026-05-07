@@ -1,12 +1,12 @@
 import {
-  GetInstallationsInput,
-  GetInstallationsOutput,
-  getGetInstallationsHandler,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
-import {
   convertEvent,
   convertVersion1Response,
 } from '@aws-smithy/server-apigateway';
+import {
+  GetInstallationsInput,
+  GetInstallationsOutput,
+  getGetInstallationsHandler,
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import {
   APIGatewayEventRequestContextIAMAuthorizer,
   APIGatewayEventRequestContextV2WithAuthorizer,

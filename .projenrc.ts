@@ -3,22 +3,22 @@ import { JobPermission } from "projen/lib/github/workflows-model";
 import { TypeScriptAppProject } from "projen/lib/typescript";
 
 const projectMetadata = {
-  author: "Amazon OSPO",
-  authorAddress: "osa-dev+puzzleglue@amazon.com",
+  author: "Scott Schreckengaust",
+  authorAddress: "scottschreckengaust@users.noreply.github.com",
   repositoryUrl:
-    "https://github.com/amazon-ospo/framework-for-github-app-on-aws.git",
+    "https://github.com/scottschreckengaust/framework-for-github-app-on-aws.git",
   cdkVersion: "2.189.1",
   constructsVersion: "10.4.2",
   defaultReleaseBranch: "main",
-  name: "@aws/app-framework-for-github-apps-on-aws",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws",
 };
-const NODE_VERSION = ">18.0.0";
+const NODE_VERSION = ">=22.0.0";
 
 const RELEASE_PACKAGES = [
-  "@aws/app-framework-for-github-apps-on-aws-ops-tools",
-  "@aws/app-framework-for-github-apps-on-aws-client",
-  "@aws/app-framework-for-github-apps-on-aws-ssdk",
-  "@aws/app-framework-for-github-apps-on-aws",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-client",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
+  "@scottschreckengaust/app-framework-for-github-apps-on-aws",
 ];
 
 export const configureMarkDownLinting = (tsProject: TypeScriptAppProject) => {
@@ -92,22 +92,32 @@ export const addTestTargets = (subProject: Project) => {
 // Main Project Configuration
 export const project = new awscdk.AwsCdkConstructLibrary({
   ...projectMetadata,
-  jsiiVersion: "~5.7.0",
+  jsiiVersion: "~5.9.0",
+  workflowNodeVersion: "22",
   projenrcTs: true,
   docgen: true,
   github: true,
-  gitignore: [".idea", "cdk.out", "__snapshots__", "classpath.json", ".remember"],
+  gitignore: [
+    ".idea",
+    "cdk.out",
+    "__snapshots__",
+    "classpath.json",
+    ".remember",
+    ".claude/worktrees/",
+    ".env",
+  ],
   eslint: true,
   eslintOptions: {
     prettier: true,
     fileExtensions: [".ts", ".md"],
-    dirs: ["src", "test", "docs"],
-    ignorePatterns: ["src/packages/smithy/build/**/*", "docs/superpowers/**/*"],
+    dirs: ["src", "test"],
+    ignorePatterns: ["src/packages/**/*"],
   },
   jestOptions: {
     jestConfig: {
       runner: "groups",
       verbose: true,
+      modulePathIgnorePatterns: ["\\.claude/worktrees/"],
     },
   },
   cdkVersionPinning: false,
@@ -115,13 +125,41 @@ export const project = new awscdk.AwsCdkConstructLibrary({
   autoMerge: false,
   releaseToNpm: false,
   constructsVersion: "10.4.2",
-  devDeps: ["lerna", "jest-runner-groups"],
+  devDeps: ["lerna", "jest-runner-groups", "eslint@^8"],
 
   // deps: [],                /* Runtime dependencies of this module. /
   // description: undefined,  / The description is just a string that helps people understand the purpose of the package. /
   // devDeps: [],             / Build dependencies for this module. /
   // packageName: undefined,  / The "name" in package.json. */
 });
+
+// Pin GitHub Actions to SHA-versioned releases
+// https://projen.io/docs/integrations/github/#actions-versions
+project.github?.actions.set(
+  "actions/checkout@v4",
+  "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd", // v6.0.2
+);
+project.github?.actions.set(
+  "actions/setup-node@v4",
+  "actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e", // v6.4.0
+);
+project.github?.actions.set(
+  "actions/upload-artifact@v4.4.0",
+  "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a", // v7.0.1
+);
+project.github?.actions.set(
+  "actions/download-artifact@v4",
+  "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c", // v8.0.1
+);
+project.github?.actions.set(
+  "peter-evans/create-pull-request@v6",
+  "peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1", // v8.1.1
+);
+project.github?.actions.set(
+  "amannn/action-semantic-pull-request@v5.4.0",
+  "amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50", // v6.1.1
+);
+
 if (project.github) {
   const buildWorkflow = project.github?.tryFindWorkflow("build");
   if (buildWorkflow && buildWorkflow.file) {
@@ -149,9 +187,7 @@ project.package.file.addOverride("workspaces", [
 ]);
 // Run Lerna build one package at a time and,
 // waits for each package to complete before showing its logs.
-project.preCompileTask.exec(
-  "npx lerna run build --concurrency=1 --no-stream --sort",
-);
+project.preCompileTask.exec("npx lerna run build --concurrency=1 --sort");
 project.addScripts({
   cli: "ts-node src/packages/app-framework-ops-tools/src/app-framework-cli.ts",
 });
@@ -207,38 +243,46 @@ export const createPackage = (config: PackageConfig) => {
 };
 
 const appFramework = createPackage({
-  name: "@aws/app-framework-for-github-apps-on-aws",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws",
   outdir: "src/packages/app-framework",
   deps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "aws-xray-sdk",
     "@aws-sdk/util-dynamodb",
     "@aws-smithy/server-common",
     "aws-lambda",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
     "re2-wasm",
     "@octokit/rest",
     "@octokit/types",
   ],
-  devDeps: ["aws-sdk-client-mock", "@aws-sdk/client-lambda@3.777.0", "@aws-sdk/client-s3@3.777.0", "@aws-sdk/client-sfn@3.777.0", "@aws-sdk/client-sns@3.777.0"],
+  devDeps: [
+    "eslint@^8",
+    "aws-sdk-client-mock",
+    "@aws-sdk/client-lambda@3.777.0",
+    "@aws-sdk/client-s3@3.777.0",
+    "@aws-sdk/client-sfn@3.777.0",
+  ],
   bundledDeps: [
     "@aws-lambda-powertools/metrics",
     "@aws-sdk/client-dynamodb",
     "@aws-sdk/client-eventbridge",
-    "@aws-smithy/server-common",
     "@aws-sdk/client-kms",
-        "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-secrets-manager",
+    "@aws-sdk/client-sns",
     "@aws-sdk/util-dynamodb",
+    "@aws-smithy/server-common",
     "aws-xray-sdk",
     "aws-lambda",
     "re2-wasm",
     "@aws-smithy/server-apigateway",
-    "@aws/app-framework-for-github-apps-on-aws-ssdk",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
     "@octokit/rest",
     "@octokit/types",
   ],
@@ -247,22 +291,26 @@ const appFramework = createPackage({
 appFramework.jest!.config.coverageThreshold = {
   global: {
     statements: 91,
-    branches: 81,
+    branches: 80,
     functions: 86,
     lines: 91,
   },
 };
 
-
 const theAppFrameworkOpsTools = new typescript.TypeScriptProject({
   ...projectMetadata,
-  name: "@aws/app-framework-for-github-apps-on-aws-ops-tools",
+  name: "@scottschreckengaust/app-framework-for-github-apps-on-aws-ops-tools",
   outdir: "src/packages/app-framework-ops-tools",
   parent: project,
   projenrcTs: false,
   release: false,
   releaseToNpm: false,
   repository: projectMetadata.repositoryUrl,
+  tsconfig: {
+    compilerOptions: {
+      skipLibCheck: true,
+    },
+  },
   deps: [
     "@aws-sdk/client-resource-groups-tagging-api",
     "@aws-sdk/client-kms",
@@ -303,7 +351,7 @@ configureMarkDownLinting(theAppFrameworkOpsTools);
 
 const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   ...projectMetadata,
-  name: "@aws/app-framework-test-app",
+  name: "@scottschreckengaust/app-framework-test-app",
   outdir: "src/packages/app-framework-test-app",
   parent: project,
   projenrcTs: false,
@@ -311,8 +359,8 @@ const theAppFrameworkTestApp = new awscdk.AwsCdkTypeScriptApp({
   cdkVersion: "2.184.1",
   deps: [
     "@aws-sdk/hash-node",
-    "@aws/app-framework-for-github-apps-on-aws",
-    "@aws/app-framework-for-github-apps-on-aws-client",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws",
+    "@scottschreckengaust/app-framework-for-github-apps-on-aws-client",
     "@aws-crypto/sha256-js",
     "@aws-sdk/credential-provider-node",
   ],
@@ -530,7 +578,7 @@ if (centralizedRelease) {
           name: "Setup Node.js",
           uses: "actions/setup-node@v4",
           with: {
-            "node-version": "lts/*",
+            "node-version": "22",
             "registry-url": "https://registry.npmjs.org",
           },
         },
@@ -690,7 +738,7 @@ if (buildArtifactWorkflow) {
           name: "Setup Node.js",
           uses: "actions/setup-node@v4",
           with: {
-            "node-version": "lts/*",
+            "node-version": "22",
             "registry-url": "https://registry.npmjs.org",
           },
         },

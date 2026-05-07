@@ -93,7 +93,8 @@ export function resolveConflicts(actions: ActionType[]): ActionType[] {
 function parseActionList(raw: unknown): ActionType[] | null {
   if (!Array.isArray(raw)) return null;
   const valid = raw.filter(
-    (a): a is ActionType => typeof a === 'string' && VALID_ACTIONS.includes(a as ActionType),
+    (a): a is ActionType =>
+      typeof a === 'string' && VALID_ACTIONS.includes(a as ActionType),
   );
   if (valid.length === 0) return null;
   return resolveConflicts(valid);

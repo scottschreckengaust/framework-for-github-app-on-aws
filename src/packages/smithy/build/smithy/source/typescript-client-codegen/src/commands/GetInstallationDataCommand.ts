@@ -41,8 +41,8 @@ export interface GetInstallationDataCommandOutput extends GetInstallationDataOut
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript
- * import { AppFrameworkClient, GetInstallationDataCommand } from "@aws/app-framework-for-github-apps-on-aws-client"; // ES Modules import
- * // const { AppFrameworkClient, GetInstallationDataCommand } = require("@aws/app-framework-for-github-apps-on-aws-client"); // CommonJS import
+ * import { AppFrameworkClient, GetInstallationDataCommand } from "@scottschreckengaust/app-framework-for-github-apps-on-aws-client"; // ES Modules import
+ * // const { AppFrameworkClient, GetInstallationDataCommand } = require("@scottschreckengaust/app-framework-for-github-apps-on-aws-client"); // CommonJS import
  * const client = new AppFrameworkClient(config);
  * const input = { // GetInstallationDataInput
  *   nodeId: "STRING_VALUE", // required

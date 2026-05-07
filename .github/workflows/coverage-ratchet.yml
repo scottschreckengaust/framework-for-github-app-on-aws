@@ -79,10 +79,10 @@ jobs:
           NEW_FUNCS: ${{ steps.bump.outputs.funcs }}
           NEW_LINES: ${{ steps.bump.outputs.lines }}
         run: |
-          sed -i "s/statements: [0-9]*/statements: $NEW_STMTS/" .projenrc.ts
-          sed -i "s/branches: [0-9]*/branches: $NEW_BRANCHES/" .projenrc.ts
-          sed -i "s/functions: [0-9]*/functions: $NEW_FUNCS/" .projenrc.ts
-          sed -i "s/lines: [0-9]*/lines: $NEW_LINES/" .projenrc.ts
+          sed -i "s/statements: [0-9]\+,/statements: $NEW_STMTS,/" .projenrc.ts
+          sed -i "s/branches: [0-9]\+,/branches: $NEW_BRANCHES,/" .projenrc.ts
+          sed -i "s/functions: [0-9]\+,/functions: $NEW_FUNCS,/" .projenrc.ts
+          sed -i "s/lines: [0-9]\+,/lines: $NEW_LINES,/" .projenrc.ts
           npx projen
 
       - name: Create PR

@@ -26,8 +26,9 @@ export class CICheckWorkflow extends Construct {
       lambdaFunction: props.checkRunStepFunction,
       payload: {
         type: 1,
+        // prettier-ignore
         value: {
-          action: 'create',
+          'action': 'create',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'headSha.$': '$.headSha',
@@ -51,8 +52,9 @@ export class CICheckWorkflow extends Construct {
       lambdaFunction: props.checkRunStepFunction,
       payload: {
         type: 1,
+        // prettier-ignore
         value: {
-          action: 'complete',
+          'action': 'complete',
           'owner.$': '$.owner',
           'repo.$': '$.repo',
           'checkRunId.$': '$.createResult.checkRunId',

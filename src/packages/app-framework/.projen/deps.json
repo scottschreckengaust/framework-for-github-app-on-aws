@@ -16,11 +16,6 @@
       "type": "build"
     },
     {
-      "name": "@aws-sdk/client-sns",
-      "version": "3.777.0",
-      "type": "build"
-    },
-    {
       "name": "@stylistic/eslint-plugin",
       "version": "^2",
       "type": "build"
@@ -128,6 +123,10 @@
       "type": "bundled"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "type": "bundled"
+    },
+    {
       "name": "@aws-sdk/util-dynamodb",
       "type": "bundled"
     },
@@ -140,15 +139,15 @@
       "type": "bundled"
     },
     {
-      "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
-      "type": "bundled"
-    },
-    {
       "name": "@octokit/rest",
       "type": "bundled"
     },
     {
       "name": "@octokit/types",
+      "type": "bundled"
+    },
+    {
+      "name": "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
       "type": "bundled"
     },
     {
@@ -194,6 +193,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/util-dynamodb",
       "type": "runtime"
     },
@@ -206,15 +209,15 @@
       "type": "runtime"
     },
     {
-      "name": "@aws/app-framework-for-github-apps-on-aws-ssdk",
-      "type": "runtime"
-    },
-    {
       "name": "@octokit/rest",
       "type": "runtime"
     },
     {
       "name": "@octokit/types",
+      "type": "runtime"
+    },
+    {
+      "name": "@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk",
       "type": "runtime"
     },
     {

@@ -66,7 +66,10 @@ program
 program
   .command('redrive')
   .description('Clear idempotency record to allow webhook event reprocessing')
-  .argument('<delivery-id>', 'GitHub webhook delivery ID (X-GitHub-Delivery header)')
+  .argument(
+    '<delivery-id>',
+    'GitHub webhook delivery ID (X-GitHub-Delivery header)',
+  )
   .argument('<table-name>', 'DynamoDB idempotency table name')
   .action(async (deliveryId: string, tableName: string) => {
     try {
@@ -80,14 +83,23 @@ program
 // subcommand - device-flow-auth
 program
   .command('device-flow-auth')
-  .description('Authorize a GitHub user via OAuth Device Flow and store token in DynamoDB')
+  .description(
+    'Authorize a GitHub user via OAuth Device Flow and store token in DynamoDB',
+  )
   .requiredOption('--client-id <clientId>', 'GitHub App Client ID')
-  .requiredOption('--user-tokens-table <tableName>', 'DynamoDB UserTokens table name')
+  .requiredOption(
+    '--user-tokens-table <tableName>',
+    'DynamoDB UserTokens table name',
+  )
   .option('--kms-key-arn <keyArn>', 'KMS key ARN for token encryption')
   .action(async (options) => {
     try {
       const { deviceFlowAuth } = await import('./deviceFlowAuth');
-      await deviceFlowAuth(options.clientId, options.userTokensTable, options.kmsKeyArn);
+      await deviceFlowAuth(
+        options.clientId,
+        options.userTokensTable,
+        options.kmsKeyArn,
+      );
     } catch (error) {
       console.error('Device flow auth failed:', error);
       process.exit(1);

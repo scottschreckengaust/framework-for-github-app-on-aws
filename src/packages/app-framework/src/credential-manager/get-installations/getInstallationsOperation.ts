@@ -1,9 +1,9 @@
+import { Operation } from '@aws-smithy/server-common';
 import {
   ServerSideError,
   GetInstallationsInput,
   GetInstallationsOutput,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
-import { Operation } from '@aws-smithy/server-common';
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import { getInstallationRecordsImpl } from './getInstallations';
 
 /**

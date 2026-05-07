@@ -23,13 +23,13 @@ jobs:
       CI: "true"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
           fetch-depth: 0
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
         with:
-          node-version: lts/*
+          node-version: "22"
           registry-url: https://registry.npmjs.org
       - name: Install dependencies
         run: yarn install --check-files --frozen-lockfile
@@ -49,7 +49,7 @@ jobs:
         run: cd dist && tar -xzf "${{ inputs.package_name }}.tgz" --strip-components=1
         working-directory: ${{ inputs.package_path }}
       - name: Upload artifact
-        uses: actions/upload-artifact@v4.4.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ${{ inputs.package_name }}
           path: ${{ inputs.package_path }}/dist

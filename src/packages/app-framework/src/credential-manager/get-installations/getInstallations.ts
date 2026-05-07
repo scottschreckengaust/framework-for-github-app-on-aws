@@ -1,4 +1,4 @@
-import { GetInstallationsOutput } from '@aws/app-framework-for-github-apps-on-aws-ssdk';
+import { GetInstallationsOutput } from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import {
   getPaginatedInstallationsImpl,
   GetPaginatedInstallations,
