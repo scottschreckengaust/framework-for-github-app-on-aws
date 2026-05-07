@@ -21,7 +21,7 @@ describe('Smithy client for installation access token API', () => {
             To run acceptance tests,
             please get the Installation Access Token endpoint from deployed Credential Manager Component:
 
-            Run 'npx projen deploy --outputs-file ./cdk-output.json'
+            Run 'npx cdk deploy --outputs-file ./cdk-output.json'
 
             Then run the tests again with:
             npm run accept

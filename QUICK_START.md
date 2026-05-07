@@ -25,7 +25,7 @@ Go to `github.com/organizations/<your-org>/settings/apps/new`:
 
 ```bash
 git clone <this-repo> && cd framework-for-github-app-on-aws
-yarn install && npx projen build
+yarn install && yarn build
 
 # Store secrets
 WEBHOOK_SECRET=$(openssl rand -hex 32)

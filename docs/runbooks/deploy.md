@@ -4,7 +4,7 @@
 
 - AWS credentials configured (check your profile with `aws sts get-caller-identity`)
 - Node.js 22+, yarn installed
-- `npx projen build` passes
+- `yarn build` passes
 
 ## CDK Deploy Context Values
 

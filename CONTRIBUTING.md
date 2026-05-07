@@ -10,7 +10,7 @@
 
 1. Create a branch from `main` (use prefix: `issues/<number>`, `fix/<description>`, `feat/<description>`)
 2. Make changes following conventions in [AGENTS.md](AGENTS.md)
-3. Ensure `npx projen build` passes
+3. Ensure `yarn build` passes
 4. Open a PR using the appropriate [template](.github/PULL_REQUEST_TEMPLATE/)
 5. Deploy and E2E test before requesting review
 6. All bot commands must still respond after deploy

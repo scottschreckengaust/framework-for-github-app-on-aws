@@ -20,7 +20,7 @@ describe('Smithy client for app token API', () => {
             To run acceptance tests, 
             please get the App Token endpoint from deployed Credential Manager Component:
       
-            Run 'npx projen deploy --outputs-file ./cdk-output.json'
+            Run 'npx cdk deploy --outputs-file ./cdk-output.json'
       
             Then run the tests again with:
             npm run accept

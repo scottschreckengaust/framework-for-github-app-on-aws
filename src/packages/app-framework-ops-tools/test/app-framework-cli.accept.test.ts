@@ -32,7 +32,7 @@ describe('app-framework CLI Acceptance tests', () => {
   beforeAll(() => {
     if (!fs.existsSync(cliPath)) {
       throw new Error(
-        `CLI not built: ${cliPath} not found. Run \`npx projen build\` first.`,
+        `CLI not built: ${cliPath} not found. Run \`yarn build\` first.`,
       );
     }
     // Ensure it's executable
