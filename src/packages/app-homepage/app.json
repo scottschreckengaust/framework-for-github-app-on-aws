@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "ai3-mvp",
+    "slug": "ai3-mvp-homepage",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "scheme": "ai3-mvp",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}
