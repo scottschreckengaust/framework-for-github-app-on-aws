@@ -1,4 +1,4 @@
-import { RefreshCachedDataOutput } from '@aws/app-framework-for-github-apps-on-aws-ssdk';
+import { RefreshCachedDataOutput } from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import {
   getAppIdsImpl,
   getMappedInstallationIdsImpl,

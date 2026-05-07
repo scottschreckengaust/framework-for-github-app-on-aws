@@ -1,4 +1,4 @@
-import { GetInstallationDataOutput } from '@aws/app-framework-for-github-apps-on-aws-ssdk';
+import { GetInstallationDataOutput } from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import {
   getInstallationsDataByNodeId as getInstallationsDataByNodeIdImpl,
   GetInstallationsByNodeId,

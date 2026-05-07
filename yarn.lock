@@ -2179,37 +2179,6 @@
     re2-wasm "^1.0.2"
     tslib "^1.8.0"
 
-"@aws/app-framework-for-github-apps-on-aws-ssdk@^0.0.19":
-  version "0.0.19"
-  resolved "https://registry.yarnpkg.com/@aws/app-framework-for-github-apps-on-aws-ssdk/-/app-framework-for-github-apps-on-aws-ssdk-0.0.19.tgz#dfc71c0dc61f0cdfc2dc8979893c9eb98f6187db"
-  integrity sha512-XGrB6UpZkITwYKEfOf193v8fXRiYDNeROqvHn/xojRmRuEyuTGQguMp4HBjEQnYHoqpT8uHHada8HS7N7S+K/A==
-  dependencies:
-    "@aws-crypto/sha256-browser" "5.2.0"
-    "@aws-crypto/sha256-js" "5.2.0"
-    "@aws-sdk/core" "3.775.0"
-    "@aws-sdk/types" "3.775.0"
-    "@aws-smithy/server-common" "1.0.0-alpha.10"
-    "@smithy/config-resolver" "^4.1.0"
-    "@smithy/fetch-http-handler" "^5.0.2"
-    "@smithy/hash-node" "^4.0.2"
-    "@smithy/invalid-dependency" "^4.0.2"
-    "@smithy/middleware-content-length" "^4.0.2"
-    "@smithy/middleware-retry" "^4.1.0"
-    "@smithy/middleware-serde" "^4.0.3"
-    "@smithy/middleware-stack" "^4.0.2"
-    "@smithy/node-http-handler" "^4.0.4"
-    "@smithy/protocol-http" "^5.1.0"
-    "@smithy/smithy-client" "^4.2.0"
-    "@smithy/types" "^4.2.0"
-    "@smithy/url-parser" "^4.0.2"
-    "@smithy/util-base64" "^4.0.0"
-    "@smithy/util-body-length-browser" "^4.0.0"
-    "@smithy/util-body-length-node" "^4.0.0"
-    "@smithy/util-defaults-mode-browser" "^4.0.8"
-    "@smithy/util-defaults-mode-node" "^4.0.8"
-    "@smithy/util-utf8" "^4.0.0"
-    tslib "^2.6.2"
-
 "@aws/lambda-invoke-store@^0.2.2":
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/@aws/lambda-invoke-store/-/lambda-invoke-store-0.2.4.tgz#802f6a50f6b6589063ef63ba8acdee86fcb9f395"

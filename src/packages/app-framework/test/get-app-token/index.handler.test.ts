@@ -1,7 +1,7 @@
 import {
   GetAppTokenOutput,
   ServerSideError,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import { APIGatewayProxyResultV2 } from 'aws-lambda';
 import { EnvironmentVariables } from '../../src/credential-manager/constants';
 import {

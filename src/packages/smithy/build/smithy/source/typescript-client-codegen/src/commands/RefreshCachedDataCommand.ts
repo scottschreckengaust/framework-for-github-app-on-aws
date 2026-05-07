@@ -41,8 +41,8 @@ export interface RefreshCachedDataCommandOutput extends RefreshCachedDataOutput,
  * @example
  * Use a bare-bones client and the command you need to make an API call.
  * ```javascript
- * import { AppFrameworkClient, RefreshCachedDataCommand } from "@aws/app-framework-for-github-apps-on-aws-client"; // ES Modules import
- * // const { AppFrameworkClient, RefreshCachedDataCommand } = require("@aws/app-framework-for-github-apps-on-aws-client"); // CommonJS import
+ * import { AppFrameworkClient, RefreshCachedDataCommand } from "@scottschreckengaust/app-framework-for-github-apps-on-aws-client"; // ES Modules import
+ * // const { AppFrameworkClient, RefreshCachedDataCommand } = require("@scottschreckengaust/app-framework-for-github-apps-on-aws-client"); // CommonJS import
  * const client = new AppFrameworkClient(config);
  * const input = {};
  * const command = new RefreshCachedDataCommand(input);

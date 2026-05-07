@@ -1,10 +1,10 @@
+import { Operation } from '@aws-smithy/server-common';
 import {
   ClientSideError,
   GetAppTokenInput,
   GetAppTokenOutput,
   ServerSideError,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
-import { Operation } from '@aws-smithy/server-common';
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import { getAppTokenImpl } from './getAppToken';
 import { VisibleError } from '../../error';
 

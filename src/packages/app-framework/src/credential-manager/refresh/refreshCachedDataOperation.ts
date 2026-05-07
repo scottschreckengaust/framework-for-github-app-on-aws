@@ -1,9 +1,9 @@
+import { Operation } from '@aws-smithy/server-common';
 import {
   ServerSideError,
   RefreshCachedDataInput,
   RefreshCachedDataOutput,
-} from '@aws/app-framework-for-github-apps-on-aws-ssdk';
-import { Operation } from '@aws-smithy/server-common';
+} from '@scottschreckengaust/app-framework-for-github-apps-on-aws-ssdk';
 import { refreshCachedDataImpl } from './refreshCachedData';
 
 /**
