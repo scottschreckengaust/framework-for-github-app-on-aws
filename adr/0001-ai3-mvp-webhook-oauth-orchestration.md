@@ -124,8 +124,8 @@ GitHub webhooks can be up to 25MB; API Gateway accepts up to 10MB; EventBridge e
 ### CDK Circular Dependencies with API Gateway
 Using `api.urlForPath()` creates a dependency on the deployment stage. Lambdas that are also API Gateway integrations create a circular dependency. Solution: construct URLs manually from `api.restApiId` and `Aws.REGION`.
 
-### Projen Manages Config Files
-All configuration changes (eslint, dependencies, bundledDeps) must go through `.projenrc.ts`. Direct edits to generated files are overwritten.
+### Config Ownership
+All configuration files (eslint, package.json, tsconfig) are owned directly. Edit them in place. (Previously managed by projen; ejected in ADR-0010.)
 
 ### SDK Version Compatibility
 Adding new `@aws-sdk/client-*` packages can pull in newer `@smithy/types` that break `aws-sdk-client-mock`. Pin new SDK clients to the same version range as existing ones, or use `devDeps` with Lambda runtime SDK for non-critical clients.

@@ -11,10 +11,10 @@
 - [ ] GitHub issue created/referenced before work began
 - [ ] Work done in dedicated worktree (not main)
 - [ ] No `.claude/worktrees/*` entries in staged files
-- [ ] `npx projen` run and all generated files committed
+- [ ] No stale generated files (config is owned directly)
 
 ## Testing
-- [ ] Unit tests pass (`npx projen build`)
+- [ ] Unit tests pass (`yarn build`)
 - [ ] TypeScript compiles (`npx tsc --noEmit`)
 - [ ] Deployed to test stack
 - [ ] E2E verified:

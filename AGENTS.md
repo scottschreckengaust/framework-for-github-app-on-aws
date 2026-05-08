@@ -13,7 +13,7 @@ The main context is the **orchestrator**. It coordinates, dispatches, and monito
 1. **Main stays clean.** Never checkout a branch in the main worktree. Pull latest before starting.
 2. **Issue first.** Every non-trivial change starts with a GitHub issue. This is the async coordination signal — other agents and humans see intent before action.
 3. **Worktree created.** Create `git worktree add .claude/worktrees/<name> issues/<number>-<slug>` from the main worktree.
-4. **Subagent dispatched.** The main context dispatches a subagent to the worktree with clear instructions: what to implement, which files to touch, and what "done" looks like. The subagent implements, runs `npx projen build`, commits specific files, and pushes.
+4. **Subagent dispatched.** The main context dispatches a subagent to the worktree with clear instructions: what to implement, which files to touch, and what "done" looks like. The subagent implements, runs `yarn build`, commits specific files, and pushes.
 5. **Draft PR.** The subagent (or main context) creates a draft PR referencing the issue. PR title must use allowed types: `feat:`, `fix:`, or `chore:`.
 6. **CI green.** Wait for all workflow checks to pass. If failures occur, dispatch the subagent again to fix in the same worktree.
 7. **Mark ready.** Once CI is green, mark the PR ready for review (`gh pr ready`).
@@ -29,12 +29,12 @@ Framework for GitHub Apps on AWS — a serverless bot platform that receives Git
 ## Stack
 
 - **Language:** TypeScript
-- **Build:** Projen (manages project config, linting, packaging)
+- **Build:** tsc + ESLint 9 flat config + Jest (direct toolchain, no projen)
 - **IaC:** AWS CDK (TypeScript)
 - **Runtime:** Node.js 22 (Lambda)
 - **Packages:** Monorepo with Lerna (`src/packages/`)
 - **Testing:** Jest (unit), CDK deploy + manual E2E
-- **Linting:** ESLint (legacy config via `.eslintrc.json`, managed by Projen)
+- **Linting:** ESLint 9 flat config (`eslint.config.mjs` per package)
 
 ## Structure
 
@@ -45,7 +45,7 @@ src/packages/
 ├── app-framework-ops-tools/ # CLI tools (import-private-key, redrive, device-flow-auth)
 └── smithy/                 # API model definitions (generates client + server SDKs)
 
-adr/                        # Architecture Decision Records (0001-0008)
+adr/                        # Architecture Decision Records (0001-0010)
 docs/runbooks/              # Operational runbooks (monitoring, recovery, auth, redrive)
 ```
 
@@ -53,8 +53,12 @@ docs/runbooks/              # Operational runbooks (monitoring, recovery, auth, 
 
 ```bash
 yarn install              # Install deps
-npx projen build          # Full build (compile + test + lint + package)
-npx projen                # Regenerate config from .projenrc.ts (REQUIRED after editing .projenrc.ts)
+yarn build                # Full build (compile + test + lint for all packages)
+
+# Per-package commands (from package dir):
+yarn compile              # TypeScript compilation only
+yarn test                 # Run tests
+yarn lint                 # Run ESLint
 
 # Deploy (from src/packages/app-framework-test-app/)
 npx cdk deploy the-app-framework-test-stack \
@@ -78,18 +82,18 @@ cd src/packages/app-framework && npx jest --testPathPattern=<pattern>
 
 ## Conventions
 
-- **Config is managed by Projen.** Never edit `.eslintrc.json`, `package.json`, `tsconfig.json` directly. Edit `.projenrc.ts` then run `npx projen`.
-- **SDK deps need both `deps` AND `bundledDeps`** in `.projenrc.ts` for the app-framework package.
+- **Config is owned directly.** Edit `package.json`, `tsconfig.json`, `eslint.config.mjs` directly. No code generation step.
+- **SDK deps need both `dependencies` AND `bundledDependencies`** in `src/packages/app-framework/package.json`.
 - **Lambda handlers use auto-discovery.** `NodejsFunction(this, 'handler', {...})` in `foo.ts` finds `foo.handler.ts` in the same directory.
-- **External AWS SDK for Lambda runtime.** Packages like `@aws-sdk/client-s3` and `@aws-sdk/client-lambda` are excluded from esbuild bundling (Lambda runtime provides them). Add as `devDeps` in `.projenrc.ts`.
+- **External AWS SDK for Lambda runtime.** Packages like `@aws-sdk/client-s3` and `@aws-sdk/client-lambda` are excluded from esbuild bundling (Lambda runtime provides them). Add as `devDependencies`.
 - **ADRs document decisions.** Create a new `adr/NNNN-*.md` for significant architectural choices.
 - **Runbooks for ops.** Add to `docs/runbooks/` for operational procedures.
 - **GitHub Issues for backlog.** P0/P1/P2 priority labels, effort estimates in body.
 
 ## Testing Requirements
 
-- Unit tests MUST pass before committing: `npx projen build`
-- TypeScript MUST compile: `npx tsc --noEmit` (from app-framework dir)
+- Unit tests MUST pass before committing: `yarn build` (from root)
+- TypeScript MUST compile: `yarn compile` (from package dir)
 - Deploy and E2E test before declaring features complete
 - Bot must respond to commands after deploy (`@ai3-mvp help`)
 
@@ -158,26 +162,6 @@ git branch -d <branch-name>                          # delete local branch
 - `fatal: branch already used by worktree`
 - CWD confusion (running commands in wrong directory)
 - Stale changes persisting across checkout
-
-## Pre-Push Checklist (Projen Mutation Prevention)
-
-CI has a "Find mutations" step that fails if committed files differ from what `npx projen` generates. This costs 18+ minutes per failed run.
-
-### Before EVERY push:
-1. `npx projen` — regenerate all config files
-2. `git diff` — review what projen changed
-3. `git add` the changed files (tasks.json, package.json, etc.)
-4. `npx projen build` — full local build to catch test/lint/synth failures
-5. Only push when build exits 0
-
-### Why this matters
-- Projen reformats `.projenrc.ts` (e.g., multi-line → single-line)
-- Projen regenerates `tasks.json`, `package.json`, `tsconfig` on every run
-- If you commit `.projenrc.ts` without regenerating, CI detects the drift and fails
-- Manual formatting that differs from Projen's output causes mutation failures
-
-### Rule
-**Never push without running `npx projen` first.** If you edited `.projenrc.ts`, the regenerated files ARE part of your commit.
 
 ## Known Gotchas
 

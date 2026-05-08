@@ -16,7 +16,7 @@
 - [ ] No `.claude/worktrees/*` entries in staged files
 
 ## Testing
-- [ ] Unit tests pass (`npx projen build`)
+- [ ] Unit tests pass (`yarn build`)
 - [ ] Deployed to test stack
 - [ ] Bug is no longer reproducible
 - [ ] No regressions: `@ai3-mvp help` still responds

@@ -71,19 +71,31 @@ jobs:
           echo "funcs=$NEW_FUNCS" >> "$GITHUB_OUTPUT"
           echo "lines=$NEW_LINES" >> "$GITHUB_OUTPUT"
 
-      - name: Update thresholds in .projenrc.ts
+      - name: Update thresholds in package.json
         if: steps.bump.outputs.needs_bump == 'true'
+        working-directory: src/packages/app-framework
         env:
           NEW_STMTS: ${{ steps.bump.outputs.stmts }}
           NEW_BRANCHES: ${{ steps.bump.outputs.branches }}
           NEW_FUNCS: ${{ steps.bump.outputs.funcs }}
           NEW_LINES: ${{ steps.bump.outputs.lines }}
         run: |
-          sed -i "s/statements: [0-9]\+,/statements: $NEW_STMTS,/" .projenrc.ts
-          sed -i "s/branches: [0-9]\+,/branches: $NEW_BRANCHES,/" .projenrc.ts
-          sed -i "s/functions: [0-9]\+,/functions: $NEW_FUNCS,/" .projenrc.ts
-          sed -i "s/lines: [0-9]\+,/lines: $NEW_LINES,/" .projenrc.ts
-          npx projen
+          python3 -c "
+          import json, os
+          stmts = int(os.environ['NEW_STMTS'])
+          branches = int(os.environ['NEW_BRANCHES'])
+          funcs = int(os.environ['NEW_FUNCS'])
+          lines = int(os.environ['NEW_LINES'])
+          with open('package.json', 'r') as f:
+              pkg = json.load(f)
+          pkg['jest']['coverageThreshold']['global']['statements'] = stmts
+          pkg['jest']['coverageThreshold']['global']['branches'] = branches
+          pkg['jest']['coverageThreshold']['global']['functions'] = funcs
+          pkg['jest']['coverageThreshold']['global']['lines'] = lines
+          with open('package.json', 'w') as f:
+              json.dump(pkg, f, indent=2)
+              f.write('\n')
+          "
 
       - name: Create PR
         if: steps.bump.outputs.needs_bump == 'true'
@@ -98,7 +110,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add .projenrc.ts src/packages/app-framework/package.json
+          git add src/packages/app-framework/package.json
           git commit -m "ci: bump coverage thresholds to current levels
 
           statements: ${NEW_STMTS}%
